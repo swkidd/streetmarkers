@@ -6,6 +6,7 @@ from django.http import HttpResponse
 from .models import Marker
 
 import json
+import markdown
 
 class HomePageView(TemplateView):
     template_name = 'home.html'
@@ -28,7 +29,7 @@ def create_marker(request):
         response_data['result'] = 'Create post successful!'
         response_data['markerpk'] = marker.pk
         response_data['title'] = marker.title
-        response_data['infoText'] = marker.infoText
+        response_data['infoText'] = markdown.markdown(marker.infoText)
         response_data['lng'] = marker.lng
         response_data['lat'] = marker.lat
 

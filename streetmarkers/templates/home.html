@@ -152,10 +152,6 @@
             })
 
             panorama = map.getStreetView();
-            panorama.setPov(({
-                heading: 265,
-                pitch: 0,
-            }));
             
             panorama.addListener('visible_changed', () => {
                 if (panorama.getVisible()) {
@@ -196,8 +192,9 @@
         
                 // handle a successful response
                 success : function(json) {
-                    console.log(json); // log the returned json to the console
                     console.log("success"); // another sanity check
+                    console.log(json); // log the returned json to the console
+                    addMarker(json.title, json.infoText)
                     document.querySelector("#floating-modal").style.display = "none"
                 },
         
@@ -217,7 +214,6 @@
             document.getElementById("modal-form-title").value = ""
             document.getElementById("modal-form-infoText").value = ""
             create_marker(title, infoText)
-            addMarker(title, infoText)
         })
     </script>
     <script>
