@@ -1,0 +1,281 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Maps</title>
+    <style>
+        /* Always set the map height explicitly to define the size of the div
+       * element that contains the map. */
+
+        #map {
+            height: 100%;
+        }
+
+        /* Optional: Makes the sample page fill the window. */
+
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        #floating-panel {
+            position: absolute;
+            top: 10px;
+            left: 25%;
+            z-index: 5;
+            background-color: #fff;
+            padding: 5px;
+            border: 1px solid #999;
+            text-align: center;
+            font-family: 'Roboto', 'sans-serif';
+            line-height: 30px;
+            padding-left: 10px;
+        }
+        
+        #floating-modal {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 5;
+            background-color: #fff;
+            padding: 5px;
+            border: 1px solid #999;
+            text-align: center;
+            font-family: 'Roboto', 'sans-serif';
+            line-height: 30px;
+            transform: translate(-50%, -50%);
+        }
+        
+        .info-window {
+            color: blue;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div id="floating-panel">
+        <input type="button" value="Add Marker" onclick="showModal();"></input>
+    </div>
+    <div id="floating-modal" hidden>
+        <form action="/create_marker/" method="POST" id="modal-form">
+            {% csrf_token %}
+            <label for="title">title: 
+                <input type="text" id="modal-form-title" name="title"><br>
+            </label>
+            <label for="infoText">info text: 
+                <textarea cols="100" rows="20" id="modal-form-infoText" name="infoText"></textarea><br>
+            </label>
+            <button type="submit">create</button>
+            <button type="button" onclick="hideModal();">cancel</button>
+            <div id="modal-form-results"></div>
+        </form>
+    </div>
+    <div id="map"></div>
+    {% for marker in markers %}
+        <map-marker 
+            hidden 
+            data-lat="{{ marker.lat }}" 
+            data-lng="{{ marker.lng }}" 
+            data-infoText="{{ marker.infoText }}"
+        >
+            {{marker.title}}
+        </map-marker>
+    {% endfor %}
+    <script src="{% static 'jquery-3.5.0.min.js' %}"></script>
+    <script>
+        var panorama, map;
+        var markers = [], infoWindows = [];
+        var lat, lng;
+        
+        const showModal = () => {
+            if (!panorama.getVisible()) return
+            document.querySelector("#floating-modal").style.display = "inline-block"
+        }
+        
+        const hideModal = () => {
+            if (!panorama.getVisible()) return
+            document.querySelector("#floating-modal").style.display = "none"
+            document.querySelector("#modal-form-results").innerHTML = ""
+        }
+        
+        const markerInfoClick = (marker, infoWindow) => {
+            marker.addListener('click', function() {
+                infoWindow.open(marker.map, marker);
+            });
+        }
+        
+        const changeMaps = (markers, map) => {
+            markers.forEach(m => m.map = map)
+        }
+        
+        
+        function initMap() {
+            var tokyo = { lat: 35.689722, lng: 139.692222 };
+
+            // Set up the map
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: tokyo,
+                zoom: 18,
+                streetViewControl: true,
+                mapTypeId: 'satellite'
+            });
+
+            infoWindows = [...document.querySelectorAll("info-window")].map(element => new google.maps.InfoWindow({
+                content: element.innerHTML
+            }))
+            
+            markers = [...document.querySelectorAll("map-marker")].map(m => {
+                const lng = parseFloat(m.getAttribute('data-lng'))
+                const lat = parseFloat(m.getAttribute('data-lat'))
+                const infoText = m.getAttribute('data-infoText')
+                const title = m.innerText
+                const marker = new google.maps.Marker({
+                    position: { lat, lng },
+                    map: map,
+                    title, 
+                })
+                console.log(infoText)
+                const infoWindow = new google.maps.InfoWindow({
+                    content: `<p id="info-window">${infoText}</p>`
+                })
+                
+                infoWindows = [...infoWindows, infoWindow]
+                markerInfoClick(marker, infoWindow)
+                return marker
+            })
+
+            panorama = map.getStreetView();
+            panorama.setPov(({
+                heading: 265,
+                pitch: 0,
+            }));
+            
+            panorama.addListener('visible_changed', () => {
+                if (panorama.getVisible()) {
+                    changeMaps(markers, panorama)
+                } else {
+                    changeMaps(markers, map)
+                }
+            })
+            
+            panorama.addListener('position_changed', () => {
+                const pos = panorama.getPosition()
+                lat = pos.lat()
+                lng = pos.lng()
+            })
+        }
+        
+        const addMarker = (title, infoText) => {
+            if (!panorama.getVisible()) return
+            const marker = new google.maps.Marker({
+                position: { lat, lng },
+                map: panorama,
+                title, 
+            })
+            const infoWindow = new google.maps.InfoWindow({
+                content: `<p class="info-window">${infoText}</p>` 
+            })
+            infoWindows = [...infoWindows, infoWindow]
+            markers = [...markers, marker]
+            markerInfoClick(marker, infoWindow)
+        }
+        
+        function create_marker(title, infoText) {
+            console.log("create post is working!") // sanity check
+            $.ajax({
+                url : "create_marker/", // the endpoint
+                type : "POST", // http method
+                data : { title, infoText, lat, lng }, // data sent with the post request
+        
+                // handle a successful response
+                success : function(json) {
+                    console.log(json); // log the returned json to the console
+                    console.log("success"); // another sanity check
+                    document.querySelector("#floating-modal").style.display = "none"
+                },
+        
+                // handle a non-successful response
+                error : function(xhr,errmsg,err) {
+                    $('#modal-form-results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: "+errmsg+
+                        " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+                    console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+                }
+            });
+        };
+        
+        $("#modal-form").on('submit', event => {
+            event.preventDefault()
+            const title = document.getElementById("modal-form-title").value
+            const infoText = document.getElementById("modal-form-infoText").value
+            document.getElementById("modal-form-title").value = ""
+            document.getElementById("modal-form-infoText").value = ""
+            create_marker(title, infoText)
+            addMarker(title, infoText)
+        })
+    </script>
+    <script>
+        $(function() {
+            // This function gets cookie with a given name
+            function getCookie(name) {
+                var cookieValue = null;
+                if (document.cookie && document.cookie != '') {
+                    var cookies = document.cookie.split(';');
+                    for (var i = 0; i < cookies.length; i++) {
+                        var cookie = jQuery.trim(cookies[i]);
+                        // Does this cookie string begin with the name we want?
+                        if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            }
+            var csrftoken = getCookie('csrftoken');
+        
+            /*
+            The functions below will create a header with csrftoken
+            */
+        
+            function csrfSafeMethod(method) {
+                // these HTTP methods do not require CSRF protection
+                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+            }
+            function sameOrigin(url) {
+                // test that a given url is a same-origin URL
+                // url could be relative or scheme relative or absolute
+                var host = document.location.host; // host + port
+                var protocol = document.location.protocol;
+                var sr_origin = '//' + host;
+                var origin = protocol + sr_origin;
+                // Allow absolute or scheme relative URLs to same origin
+                return (url == origin || url.slice(0, origin.length + 1) == origin + '/') ||
+                    (url == sr_origin || url.slice(0, sr_origin.length + 1) == sr_origin + '/') ||
+                    // or any other URL that isn't scheme relative or absolute i.e relative.
+                    !(/^(\/\/|http:|https:).*/.test(url));
+            }
+        
+            $.ajaxSetup({
+                beforeSend: function(xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && sameOrigin(settings.url)) {
+                        // Send the token to same-origin, relative URLs only.
+                        // Send the token only if the method warrants CSRF protection
+                        // Using the CSRFToken value acquired earlier
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                }
+            });
+        
+        });
+    </script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9jTGYNpWqhcKSA3dI_atkepXqAIvfnck&callback=initMap"></script>
+</body>
+
+</html>
