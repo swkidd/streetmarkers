@@ -12,7 +12,10 @@ class HomePageView(TemplateView):
     template_name = 'home.html'
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['markers'] = Marker.objects.all() 
+        context['markers'] = [ { 
+            **m,
+            'infoText': markdown.markdown(m['infoText']),
+        } for m in Marker.objects.values()] 
         return context
         
 def create_marker(request):

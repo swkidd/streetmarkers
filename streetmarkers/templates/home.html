@@ -7,34 +7,38 @@
     <meta charset="utf-8">
     <title>Maps</title>
     <style>
-        /* Always set the map height explicitly to define the size of the div
-       * element that contains the map. */
-
-        #map {
-            height: 100%;
-        }
-
-        /* Optional: Makes the sample page fill the window. */
-
         html,
         body {
             height: 100%;
             margin: 0;
             padding: 0;
         }
-
-        #floating-panel {
+        
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #pano {
             position: absolute;
-            top: 10px;
-            left: 25%;
-            z-index: 5;
-            background-color: #fff;
-            padding: 5px;
-            border: 1px solid #999;
-            text-align: center;
-            font-family: 'Roboto', 'sans-serif';
-            line-height: 30px;
-            padding-left: 10px;
+            top: 0;
+            left: 0;
+        }
+        
+        #map {
+            z-index: 10;
+        }
+        
+        .big-map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .pip-map {
+            height: 250px;
+            width: 250px;
+            margin: 10px;
         }
         
         #floating-modal {
@@ -60,9 +64,6 @@
 </head>
 
 <body>
-    <div id="floating-panel">
-        <input type="button" value="Add Marker" onclick="showModal();"></input>
-    </div>
     <div id="floating-modal" hidden>
         <form action="/create_marker/" method="POST" id="modal-form">
             {% csrf_token %}
@@ -77,7 +78,10 @@
             <div id="modal-form-results"></div>
         </form>
     </div>
-    <div id="map"></div>
+    <div id="container">
+        <div id="map" class="big-map"></div>
+        <div id="pano" class="big-map" style="display: none;"></div>
+    </div>
     {% for marker in markers %}
         <map-marker 
             hidden 
@@ -92,7 +96,11 @@
     <script>
         var panorama, map;
         var markers = [], infoWindows = [];
+        var mapContainerDiv = document.getElementById("container")
+        var mapDiv = document.getElementById("map") 
+        var panoDiv = document.getElementById("pano") 
         var lat, lng;
+        var pegMovingInSV = false
         
         const showModal = () => {
             if (!panorama.getVisible()) return
@@ -118,14 +126,40 @@
         
         function initMap() {
             var tokyo = { lat: 35.689722, lng: 139.692222 };
-
+            
+            /* create new panoramma to support picture in picture map */
+            panorama = new google.maps.StreetViewPanorama(panoDiv, {
+                enableCloseButton: true,
+                addressControl: true,
+                visible: false,
+            })
+            
             // Set up the map
-            map = new google.maps.Map(document.getElementById('map'), {
+            map = new google.maps.Map(mapDiv, {
                 center: tokyo,
                 zoom: 18,
+                mapTypeId: 'satellite',
+                streetView: panorama,
                 streetViewControl: true,
-                mapTypeId: 'satellite'
+                zoomControl: true,
+                mapTypeControl: true,
+                scaleControl: true,
+                rotateControl: true,
+                fullscreenControl: true,
+                overviewMapControl: true,
             });
+            
+            // const addMarkerDiv = document.createElement("div")
+            // const floatingPanel = new CreateMarkerControl(addMarkerDiv, panorama)
+            // addMarkerDiv.index = 1
+            // panorama.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(addMarkerDiv);
+            
+            // const pipDiv = document.createElement("div")
+            // pipDiv.style.width = "500px"
+            // pipDiv.style.height = "500px"
+            // pipDiv.index = 1
+            // panorama.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(pipDiv);
+
 
             infoWindows = [...document.querySelectorAll("info-window")].map(element => new google.maps.InfoWindow({
                 content: element.innerHTML
@@ -141,7 +175,6 @@
                     map: map,
                     title, 
                 })
-                console.log(infoText)
                 const infoWindow = new google.maps.InfoWindow({
                     content: `<p id="info-window">${infoText}</p>`
                 })
@@ -150,21 +183,76 @@
                 markerInfoClick(marker, infoWindow)
                 return marker
             })
-
-            panorama = map.getStreetView();
             
-            panorama.addListener('visible_changed', () => {
-                if (panorama.getVisible()) {
-                    changeMaps(markers, panorama)
-                } else {
-                    changeMaps(markers, map)
+            map.addListener("mouseover", () => {
+                if ($("#pano").is(':visible')) {
+                    pegMovingInSV = true
                 }
             })
             
+            map.addListener("mouseout", () => {
+                if ($("#pano").is(':visible')) {
+                    pegMovingInSV = false 
+                }
+            })
+            
+            
+            const panoLBControls = panorama.controls[google.maps.ControlPosition.LEFT_BOTTOM]
+            
+            panorama.addListener("visible_changed", function() {
+                if(panorama.getVisible() && $("#pano").is(':hidden')){
+                    $("#pano").show();          
+                    $("#map").removeClass('big-map');
+                    $("#map").addClass('pip-map');
+                    changeMaps(markers, panorama)
+                    panoLBControls.push(mapDiv)
+                    map.setOptions({
+                        streetViewControl: false,
+                        zoomControl: true,
+                        mapTypeControl: false,
+                        scaleControl: false,
+                        rotateControl: false,
+                        fullscreenControl: true,
+                        overviewMapControl: false,
+                    })
+                }
+            });        
+            
+            panorama.addListener("closeclick", function() {
+                $("#pano").hide();  
+                $("#map").removeClass('pip-map');
+                $("#map").addClass('big-map');        
+                changeMaps(markers, map)
+                
+                // remove pip-map from pano controls and add it back to container
+                const index = panoLBControls.indexOf(mapDiv)
+                if (index > -1) {
+                    const div = panoLBControls.removeAt(index)
+                    mapContainerDiv.append(div)
+                }
+                
+                // reset the map default map controls 
+                map.setOptions({
+                    streetViewControl: true,
+                    zoomControl: true,
+                    mapTypeControl: true,
+                    scaleControl: true,
+                    rotateControl: true,
+                    fullscreenControl: true,
+                    overviewMapControl: true,
+                })
+            });
+            
+            //TODO: might be a better way to store current lat/ lng for use with add marker
             panorama.addListener('position_changed', () => {
                 const pos = panorama.getPosition()
                 lat = pos.lat()
                 lng = pos.lng()
+                
+                // dont reposition the map while peg man is being dragged
+                if (!pegMovingInSV) {
+                    map.setCenter(pos)
+                }
             })
         }
         
@@ -184,7 +272,6 @@
         }
         
         function create_marker(title, infoText) {
-            console.log("create post is working!") // sanity check
             $.ajax({
                 url : "create_marker/", // the endpoint
                 type : "POST", // http method
@@ -192,8 +279,6 @@
         
                 // handle a successful response
                 success : function(json) {
-                    console.log("success"); // another sanity check
-                    console.log(json); // log the returned json to the console
                     addMarker(json.title, json.infoText)
                     document.querySelector("#floating-modal").style.display = "none"
                 },
@@ -215,6 +300,39 @@
             document.getElementById("modal-form-infoText").value = ""
             create_marker(title, infoText)
         })
+        
+        function CreateMarkerControl(controlDiv, map) {
+            // assumes control will be positioned bottom left
+            var controlUI = document.createElement('div');
+            controlUI.style.position = "absolute"
+            controlUI.style.bottom = "5px"
+            controlUI.style.left = "5px"
+            controlUI.style.backgroundColor = 'rgb(34, 34, 34)';
+            controlUI.style.border = '0px';
+            controlUI.style.borderRadius = '2px';
+            controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+            controlUI.style.cursor = 'pointer';
+            controlUI.style.marginBottom = '22px';
+            controlUI.style.textAlign = 'center';
+            controlUI.style.userSelect = "none"
+            controlUI.title = 'Click to add a marker to the map';
+            controlDiv.appendChild(controlUI);
+            
+            var controlText = document.createElement('div');
+            controlText.style.color = 'rgb(221,224,216)';
+            controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+            controlText.style.fontSize = '16px';
+            controlText.style.lineHeight = '38px';
+            controlText.style.paddingLeft = '5px';
+            controlText.style.paddingRight = '5px';
+            controlText.innerHTML = 'Add Marker';
+            controlUI.appendChild(controlText);
+            
+            controlUI.addEventListener('click', function() {
+                showModal()
+            });
+        }
+        
     </script>
     <script>
         $(function() {
