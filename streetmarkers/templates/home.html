@@ -1,4 +1,5 @@
 {% load static %}
+{% load bootstrap4 %}
 
 <!DOCTYPE html>
 <html>
@@ -64,7 +65,7 @@
 </head>
 
 <body>
-    <div id="floating-modal" hidden>
+    <div id="floating-modal" style="display: none;">
         <form action="/create_marker/" method="POST" id="modal-form">
             {% csrf_token %}
             <label for="title">title: 
@@ -120,7 +121,7 @@
         }
         
         const changeMaps = (markers, map) => {
-            markers.forEach(m => m.map = map)
+            markers.forEach(m => m.setMap(map))
         }
         
         
@@ -149,17 +150,13 @@
                 overviewMapControl: true,
             });
             
-            // const addMarkerDiv = document.createElement("div")
-            // const floatingPanel = new CreateMarkerControl(addMarkerDiv, panorama)
-            // addMarkerDiv.index = 1
-            // panorama.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(addMarkerDiv);
-            
-            // const pipDiv = document.createElement("div")
-            // pipDiv.style.width = "500px"
-            // pipDiv.style.height = "500px"
-            // pipDiv.index = 1
-            // panorama.controls[google.maps.ControlPosition.LEFT_BOTTOM].push(pipDiv);
-
+            const addMarkerDiv = document.createElement("div")
+            addMarkerDiv.style.width = "40px"
+            addMarkerDiv.style.height = "40px"
+            addMarkerDiv.style.margin = "10px"
+            const floatingPanel = new CreateMarkerControl(addMarkerDiv, panorama)
+            addMarkerDiv.index = 1
+            panorama.controls[google.maps.ControlPosition.RIGHT_TOP].push(addMarkerDiv);
 
             infoWindows = [...document.querySelectorAll("info-window")].map(element => new google.maps.InfoWindow({
                 content: element.innerHTML
@@ -172,7 +169,7 @@
                 const title = m.innerText
                 const marker = new google.maps.Marker({
                     position: { lat, lng },
-                    map: map,
+                    map,
                     title, 
                 })
                 const infoWindow = new google.maps.InfoWindow({
@@ -195,7 +192,6 @@
                     pegMovingInSV = false 
                 }
             })
-            
             
             const panoLBControls = panorama.controls[google.maps.ControlPosition.LEFT_BOTTOM]
             
@@ -257,7 +253,6 @@
         }
         
         const addMarker = (title, infoText) => {
-            if (!panorama.getVisible()) return
             const marker = new google.maps.Marker({
                 position: { lat, lng },
                 map: panorama,
@@ -302,11 +297,7 @@
         })
         
         function CreateMarkerControl(controlDiv, map) {
-            // assumes control will be positioned bottom left
             var controlUI = document.createElement('div');
-            controlUI.style.position = "absolute"
-            controlUI.style.bottom = "5px"
-            controlUI.style.left = "5px"
             controlUI.style.backgroundColor = 'rgb(34, 34, 34)';
             controlUI.style.border = '0px';
             controlUI.style.borderRadius = '2px';
@@ -325,11 +316,15 @@
             controlText.style.lineHeight = '38px';
             controlText.style.paddingLeft = '5px';
             controlText.style.paddingRight = '5px';
-            controlText.innerHTML = 'Add Marker';
+            controlText.innerHTML = 'M';
             controlUI.appendChild(controlText);
             
             controlUI.addEventListener('click', function() {
-                showModal()
+                if ($("#floating-modal").is(":visible")) {
+                    hideModal()
+                } else {
+                    showModal()
+                }
             });
         }
         
