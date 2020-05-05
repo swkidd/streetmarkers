@@ -26,7 +26,7 @@ SECRET_KEY = '4aspx&y6xa&m0mko+=w&kw37f(oyh*(axkv)^z&^a1g6zw%&sg'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '82cd51a9f9c7484a9fe4e30c0487770e.vfs.cloud9.us-east-1.amazonaws.com'
+    '*'
 ]
 
 # Application definition

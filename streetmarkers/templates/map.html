@@ -1,0 +1,104 @@
+{% load static %}
+{% load bootstrap4 %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='full' %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>Maps</title>
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        #container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        #pano {
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        #map {
+            z-index: 10;
+        }
+        
+        .big-map {
+            height: 100%;
+            width: 100%;
+        }
+        
+        .pip-map {
+            height: 250px;
+            width: 250px;
+            margin: 10px;
+        }
+        
+        #floating-modal {
+            display: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            z-index: 5;
+            background-color: #fff;
+            padding: 5px;
+            border: 1px solid #999;
+            text-align: center;
+            font-family: 'Roboto', 'sans-serif';
+            line-height: 30px;
+            transform: translate(-50%, -50%);
+        }
+        
+        .info-window {
+            color: blue;
+        }
+        
+    </style>
+</head>
+
+<body>
+    <div id="floating-modal" style="display: none;">
+        <form action="/create_marker/" method="POST" id="modal-form">
+            {% csrf_token %}
+            <label for="title">title: 
+                <input type="text" id="modal-form-title" name="title"><br>
+            </label>
+            <label for="infoText">info text: 
+                <textarea cols="100" rows="20" id="modal-form-infoText" name="infoText"></textarea><br>
+            </label>
+            <button type="submit">create</button>
+            <button type="button" onclick="hideModal();">cancel</button>
+            <div id="modal-form-results"></div>
+        </form>
+    </div>
+    <div id="container">
+        <div id="map" class="big-map"></div>
+        <div id="pano" class="big-map" style="display: none;"></div>
+    </div>
+    {% for marker in markers %}
+        <map-marker 
+            hidden 
+            data-lat="{{ marker.lat }}" 
+            data-lng="{{ marker.lng }}" 
+            data-infoText="{{ marker.infoText }}"
+        >
+            {{marker.title}}
+        </map-marker>
+    {% endfor %}
+    <script src="{% static 'jquery-3.5.0.min.js' %}"></script>
+    <script src="{% static 'streetmarkers/index.js' %}"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9jTGYNpWqhcKSA3dI_atkepXqAIvfnck&callback=initMap"></script>
+</body>
+
+</html>
