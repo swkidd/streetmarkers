@@ -7,14 +7,9 @@ from django import forms
 from .models import Marker
 from django.contrib.auth.models import User
 
-from .forms import Form
-
 import json
 import markdown
 
-class LoginPageView(FormView):
-    template_name = 'login.html'
-    form_class = Form
 
 
 class HomePageView(TemplateView):
