@@ -1,33 +1,46 @@
 from django.conf import settings
 from django.views.generic.base import TemplateView
+from django.views.generic import FormView
 from django.shortcuts import render
 from django.http import HttpResponse
-
+from django import forms
 from .models import Marker
+from django.contrib.auth.models import User
+
+from .forms import Form
 
 import json
 import markdown
 
+class LoginPageView(FormView):
+    template_name = 'login.html'
+    form_class = Form
+
+
 class HomePageView(TemplateView):
     template_name = 'home.html'
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        # context['markers'] = [ { 
+        # context['markers'] = [ {
         #     **m,
         #     'infoText': markdown.markdown(m['infoText']),
-        # } for m in Marker.objects.values()] 
+        # } for m in Marker.objects.values()]
         return context
+
 
 class MapPageView(TemplateView):
     template_name = 'map.html'
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['markers'] = [ { 
+        context['markers'] = [{
             **m,
             'infoText': markdown.markdown(m['infoText']),
-        } for m in Marker.objects.values()] 
+        } for m in Marker.objects.values()]
         return context
-        
+
+
 def create_marker(request):
     if request.method == 'POST':
         title = request.POST.get('title')
