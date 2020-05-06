@@ -6,15 +6,15 @@ from django.http import HttpResponse
 from django import forms
 from .models import Marker
 from django.contrib.auth.models import User
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required 
+from django.urls import reverse
 
 import json
 import markdown
 
-
-
 class HomePageView(TemplateView):
     template_name = 'home.html'
-
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # context['markers'] = [ {
@@ -23,8 +23,7 @@ class HomePageView(TemplateView):
         # } for m in Marker.objects.values()]
         return context
 
-
-class MapPageView(TemplateView):
+class MapPageView(LoginRequiredMixin, TemplateView):
     template_name = 'map.html'
 
     def get_context_data(self, **kwargs):
@@ -35,7 +34,7 @@ class MapPageView(TemplateView):
         } for m in Marker.objects.values()]
         return context
 
-
+@login_required
 def create_marker(request):
     if request.method == 'POST':
         title = request.POST.get('title')

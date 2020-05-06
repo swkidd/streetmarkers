@@ -1,0 +1,19 @@
+{% extends "base_generic.html" %}
+
+{% load bootstrap4 %}
+
+{% bootstrap_css %}
+{% bootstrap_javascript jquery='full' %}
+
+{% block content %}
+<form role="form" method="post">
+    {% csrf_token %}
+    {% bootstrap_form_errors form type='non_fields' %}
+    {% bootstrap_field form.username show_help=False %}
+    {% bootstrap_field form.email show_help=False %}
+    {% bootstrap_field form.password1 show_help=False %}
+    {% bootstrap_field form.password2 show_help=False %}
+    {% buttons submit='OK' reset="Clear" %}{% endbuttons %}
+    <p>Already have an account? <a href="{% url 'login' %}">Login</a></p>
+</form>
+{% endblock content %}

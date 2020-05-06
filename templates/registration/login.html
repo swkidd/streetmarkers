@@ -32,7 +32,12 @@
     <div>{{ next }}</div>
     <input type="hidden" name="next" value="{{ next }}">
 </form>
-
+{% for message in messages %}
+    <p>{{ message }}</p>
+{% endfor %}
 {# Assumes you setup the password_reset view in your URLconf #}
-<p><a href="{% url 'password_reset' %}">Lost password?</a></p>
+<p>
+    <a href="{% url 'password_reset' %}">Lost password?</a>
+    <a href="{% url 'registration' %}">Sign up</a>
+</p>
 {% endblock %}
