@@ -28,7 +28,6 @@ const changeMaps = (markers, map) => {
     markers.forEach(m => m.setMap(map))
 }
 
-
 function initMap() {
     var tokyo = { lat: 35.689722, lng: 139.692222 };
 
@@ -63,7 +62,8 @@ function initMap() {
     panorama.controls[google.maps.ControlPosition.RIGHT_TOP].push(addMarkerDiv);
 
     infoWindows = [...document.querySelectorAll("info-window")].map(element => new google.maps.InfoWindow({
-        content: element.innerHTML
+        content: element.innerHTML,
+        disableAutoPan: true,
     }))
 
     markers = [...document.querySelectorAll("map-marker")].map(m => {
@@ -77,7 +77,8 @@ function initMap() {
             title,
         })
         const infoWindow = new google.maps.InfoWindow({
-            content: `<p id="info-window">${infoText}</p>`
+            content: `<p id="info-window">${infoText}</p>`,
+            disableAutoPan: true,
         })
 
         infoWindows = [...infoWindows, infoWindow]
@@ -85,20 +86,10 @@ function initMap() {
         return marker
     })
 
-    map.addListener("mouseover", () => {
-        if ($("#pano").is(':visible')) {
-            pegMovingInSV = true
-        }
-    })
-
-    map.addListener("mouseout", () => {
-        if ($("#pano").is(':visible')) {
-            pegMovingInSV = false
-        }
-    })
-
     const panoLBControls = panorama.controls[google.maps.ControlPosition.LEFT_BOTTOM]
-
+    let listeners = []
+    let sl = new google.maps.StreetViewCoverageLayer()
+    //set up panorama for display
     panorama.addListener("visible_changed", function () {
         if (panorama.getVisible() && $("#pano").is(':hidden')) {
             $("#pano").show();
@@ -115,9 +106,25 @@ function initMap() {
                 fullscreenControl: true,
                 overviewMapControl: false,
             })
+            mapDiv.styles['border-radius'] = "10px"
+            mapDiv.styles['border'] = "2px solid black"
+            let clickListener = map.addListener('click', e => panorama.setPosition(e.latLng))
+            //mouse move is used incase pip map is initalized over the mouse
+            let mouseOverListener = map.addListener("mousemove", () => {
+                if (!sl.getMap()) {
+                    sl.setMap(map)
+                }
+                pegMovingInSV = true
+            })
+            let mouseOutListener = map.addListener("mouseout", () => {
+                sl.setMap(null)
+                pegMovingInSV = false
+            })
+            listeners = [clickListener, mouseOverListener, mouseOutListener]
         }
     });
 
+    //set up panorama for closing
     panorama.addListener("closeclick", function () {
         $("#pano").hide();
         $("#map").removeClass('pip-map');
@@ -130,6 +137,9 @@ function initMap() {
             const div = panoLBControls.removeAt(index)
             mapContainerDiv.append(div)
         }
+        
+        mapDiv.styles['border-radius'] = "0px"
+        mapDiv.styles['border'] = "none"
 
         // reset the map default map controls 
         map.setOptions({
@@ -141,6 +151,9 @@ function initMap() {
             fullscreenControl: true,
             overviewMapControl: true,
         })
+
+        //remove all pip map only listeners from the map
+        listeners.forEach(listener => listener.remove())
     });
 
     //TODO: might be a better way to store current lat/ lng for use with add marker
