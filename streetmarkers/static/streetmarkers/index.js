@@ -7,6 +7,16 @@ var panoDiv = document.getElementById("pano")
 var lat, lng;
 var pegMovingInSV = false
 
+const showMenu = () => {
+    // dont show the menu in panorama mode
+    document.querySelector("#menu-modal").style.display = "inline-block"
+}
+
+const hideMenu = () => {
+    document.querySelector("#menu-modal").style.display = "none"
+}
+
+
 const showModal = () => {
     if (!panorama.getVisible()) return
     document.querySelector("#floating-modal").style.display = "inline-block"
@@ -53,11 +63,21 @@ function initMap() {
         overviewMapControl: true,
     });
 
+    // add menu button to map view
+    const addMenuDiv = document.createElement("div")
+    addMenuDiv.style.width = "40px"
+    addMenuDiv.style.height = "40px"
+    addMenuDiv.style.margin = "10px"
+    const menuObj = new CreateMenuControl(addMenuDiv, map)
+    addMenuDiv.index = 1
+    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(addMenuDiv);
+
+    // add create marker element to panorama view
     const addMarkerDiv = document.createElement("div")
     addMarkerDiv.style.width = "40px"
     addMarkerDiv.style.height = "40px"
     addMarkerDiv.style.margin = "10px"
-    const floatingPanel = new CreateMarkerControl(addMarkerDiv, panorama)
+    const createMarkerObj = new CreateMarkerControl(addMarkerDiv, panorama)
     addMarkerDiv.index = 1
     panorama.controls[google.maps.ControlPosition.RIGHT_TOP].push(addMarkerDiv);
 
@@ -106,8 +126,8 @@ function initMap() {
                 fullscreenControl: true,
                 overviewMapControl: false,
             })
-            mapDiv.styles['border-radius'] = "10px"
-            mapDiv.styles['border'] = "2px solid black"
+            mapDiv.style['border-radius'] = "10px"
+            mapDiv.style['border'] = "2px solid black"
             let clickListener = map.addListener('click', e => panorama.setPosition(e.latLng))
             //mouse move is used incase pip map is initalized over the mouse
             let mouseOverListener = map.addListener("mousemove", () => {
@@ -121,6 +141,8 @@ function initMap() {
                 pegMovingInSV = false
             })
             listeners = [clickListener, mouseOverListener, mouseOutListener]
+            //make sure menu modal isn't open
+            hideMenu()
         }
     });
 
@@ -138,8 +160,8 @@ function initMap() {
             mapContainerDiv.append(div)
         }
         
-        mapDiv.styles['border-radius'] = "0px"
-        mapDiv.styles['border'] = "none"
+        mapDiv.style['border-radius'] = "0px"
+        mapDiv.style['border'] = "none"
 
         // reset the map default map controls 
         map.setOptions({
@@ -151,6 +173,9 @@ function initMap() {
             fullscreenControl: true,
             overviewMapControl: true,
         })
+
+        //make sure add marker modal isn't open
+        hideModal()
 
         //remove all pip map only listeners from the map
         listeners.forEach(listener => listener.remove())
@@ -241,6 +266,38 @@ function CreateMarkerControl(controlDiv, map) {
             hideModal()
         } else {
             showModal()
+        }
+    });
+}
+
+function CreateMenuControl(controlDiv, map) {
+    var controlUI = document.createElement('div');
+    controlUI.style.backgroundColor = 'rgb(255, 255, 255)';
+    controlUI.style.border = '0px';
+    controlUI.style.borderRadius = '2px';
+    controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+    controlUI.style.cursor = 'pointer';
+    controlUI.style.marginBottom = '22px';
+    controlUI.style.textAlign = 'center';
+    controlUI.style.userSelect = "none"
+    controlUI.title = 'Click to add a marker to the map';
+    controlDiv.appendChild(controlUI);
+
+    var controlText = document.createElement('div');
+    controlText.style.color = 'rgb(66, 66, 66)';
+    controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
+    controlText.style.fontSize = '16px';
+    controlText.style.lineHeight = '38px';
+    controlText.style.paddingLeft = '5px';
+    controlText.style.paddingRight = '5px';
+    controlText.innerHTML = 'M';
+    controlUI.appendChild(controlText);
+
+    controlUI.addEventListener('click', function () {
+        if ($("#menu-modal").is(":visible")) {
+            hideMenu()
+        } else {
+            showMenu()
         }
     });
 }
