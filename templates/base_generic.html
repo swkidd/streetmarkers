@@ -16,7 +16,7 @@
         }
 
         .jumbotron {
-            background: url("image.jpg") no-repeat center;
+            /*background: url("image.jpg") no-repeat center;*/
         }
 
         footer {
@@ -40,6 +40,9 @@
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav ml-auto">
                     {% if user.is_authenticated %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'streetmarkers:map' %}">Map</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'logout' %}">Logout</a>
                     </li>
