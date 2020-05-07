@@ -49,6 +49,10 @@
         #floating-modal {
             display: none;
             position: absolute;
+            min-width: 250px;
+            max-width: 90%;
+            max-height: 70vh;
+            overflow: scroll;
             top: 50%;
             left: 50%;
             z-index: 5;
@@ -65,6 +69,8 @@
             display: none;
             position: absolute;
             min-width: 250px;
+            max-height: 70vh;
+            overflow: scroll;
             top: 50%;
             left: 50%;
             z-index: 5;
@@ -101,11 +107,12 @@
     <div id="floating-modal" style="display: none;">
         <form action="/create_marker/" method="POST" id="modal-form">
             {% csrf_token %}
+            <!--consider using bootstrap form-->
             <label for="title">title:
                 <input type="text" id="modal-form-title" name="title"><br>
             </label>
             <label for="infoText">info text:
-                <textarea cols="100" rows="20" id="modal-form-infoText" name="infoText"></textarea><br>
+                <textarea cols="40" rows="5" id="modal-form-infoText" name="infoText"></textarea><br>
             </label>
             <button type="submit">create</button>
             <button type="button" onclick="hideModal();">cancel</button>

@@ -194,6 +194,7 @@ function initMap() {
     })
 }
 
+// add marker to map
 const addMarker = (title, infoText) => {
     const marker = new google.maps.Marker({
         position: { lat, lng },
@@ -208,6 +209,7 @@ const addMarker = (title, infoText) => {
     markerInfoClick(marker, infoWindow)
 }
 
+// add marker to database
 function create_marker(title, infoText) {
     $.ajax({
         url: "create_marker/", // the endpoint

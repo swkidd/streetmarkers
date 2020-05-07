@@ -26,10 +26,13 @@ class HomePageView(TemplateView):
 class MapPageView(LoginRequiredMixin, TemplateView):
     template_name = 'map.html'
 
+    #support multiple form (marker) types by adding form list to context
+    #use bootstrap forms to render conditional on a select tag
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['markers'] = [{
             **m,
+            #remove html support for markdown
             'infoText': markdown.markdown(m['infoText']),
         } for m in Marker.objects.values()]
         return context
