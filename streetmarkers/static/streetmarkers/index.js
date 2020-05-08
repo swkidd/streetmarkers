@@ -212,7 +212,7 @@ const addMarker = (title, infoText) => {
 // add marker to database
 function create_marker(title, infoText) {
     $.ajax({
-        url: "create_marker/", // the endpoint
+        url: "/ajax/create_marker/", // the endpoint
         type: "POST", // http method
         data: { title, infoText, lat, lng }, // data sent with the post request
 
@@ -230,6 +230,36 @@ function create_marker(title, infoText) {
         }
     });
 };
+
+// load palace paths dynamically
+function load_paths(palace_id, success, errorDivId) {
+    $.ajax({
+        url: "/ajax/load_paths/",
+        type: "GET", 
+        data: { palace_id }, 
+        success: success,
+        error: function (xhr, errmsg, err) {
+            $(`#${errorDivId}`).html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: " + errmsg +
+                " <a href='#' class='close'>&times;</a></div>"); 
+            console.log(xhr.status + ": " + xhr.responseText); 
+        }
+    });
+};
+
+$("#palace-list").one('click', event => {
+    const palaceId = event.target.getAttribute('data-palace-id')
+    const success = paths => {
+        console.log(paths)
+        paths.forEach(path => {
+            const div = document.createElement('div')
+            div.classList = ['list-group-item']
+            div.innerText = path.title
+            $(`#paths-${palaceId}`).append(div)
+        })
+    }
+    const errorDivId = 'menu-modal-error'
+    load_paths(palaceId, success, errorDivId)
+})
 
 $("#modal-form").on('submit', event => {
     event.preventDefault()
