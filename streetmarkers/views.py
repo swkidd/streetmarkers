@@ -1,13 +1,14 @@
 import json
 from django.conf import settings
 from django.views.generic.base import TemplateView
+from django.views.generic import ListView, DetailView
 from django.shortcuts import render
 from django.http import HttpResponse
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse
+from django.urls import reverse_lazy
 
 from .models import Palace, Path, BasicMarker
 from .forms import PalaceForm, PathForm, BasicMarkerForm
@@ -16,6 +17,8 @@ from .forms import PalaceForm, PathForm, BasicMarkerForm
 import logging
 import logging.config
 import sys
+from django.urls.base import reverse
+from django.db.models import Q
 
 LOGGING = {
     'version': 1,
@@ -37,8 +40,37 @@ logging.config.dictConfig(LOGGING)
 #import markdown
 
 
+class UserPalaceView(LoginRequiredMixin, ListView):
+    model = Palace
+    template_name = 'streetmarkers/user_palace.html'
+    paginate_by = 5
+
+    def get_queryset(self):
+        return Palace.objects.filter(createdBy=self.request.user).order_by('title')
+
+
+class UserPalaceDetailView(LoginRequiredMixin, DetailView):
+    model = Palace
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['paths'] = Path.objects.filter(
+            createdBy=self.request.user).filter(palace=self.get_object())
+        return context
+
+
+class UserPathDetailView(LoginRequiredMixin, DetailView):
+    model = Path
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['markers'] = BasicMarker.objects.filter(
+            createdBy=self.request.user).filter(path=self.get_object())
+        return context
+
+
 class HomePageView(TemplateView):
-    template_name = 'home.html'
+    template_name = 'streetmarkers/home.html'
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -46,7 +78,7 @@ class HomePageView(TemplateView):
 
 
 class MapPageView(LoginRequiredMixin, TemplateView):
-    template_name = 'map.html'
+    template_name = 'streetmarkers/map.html'
 
     # support multiple form (marker) types by adding form list to context
     # use bootstrap forms to render conditional on a select tag
@@ -98,7 +130,7 @@ def load_paths(request):
         palace_id = request.GET.get('palace_id')
         paths = Path.objects.filter(palace_id=palace_id)
         response_data = [
-            { 
+            {
                 'title': path.title,
                 'palace_title': path.palace.title,
                 'palace_id': path.palace.id,

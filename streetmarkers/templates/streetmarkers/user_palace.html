@@ -1,0 +1,22 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+<h1>{{ user.username|title }}'s Palaces</h1>
+
+
+{% if palace_list %}
+<ul>
+
+  {% for palace in palace_list %}
+  <div class="list-group">
+    <a href="{% url 'streetmarkers:user_palace_detail' palace.pk %}">
+      {{ palace.title }}
+    </a>
+  </div>
+  {% endfor %}
+</ul>
+
+{% else %}
+<p>You don't have any palaces yet. Why don't you <a href="{% url 'streetmarkers:map' %}">create</a> one?</p>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,9 @@
+{% extends 'base_generic.html' %} 
+
+{% block content %}
+{% for marker in markers %}
+  <div class="list-group">
+      {{ marker.title }}
+  </div>
+{% endfor %}
+{% endblock %}

@@ -41,6 +41,9 @@
                 <ul class="navbar-nav ml-auto">
                     {% if user.is_authenticated %}
                     <li class="nav-item">
+                        <a class="nav-link" href="{% url 'streetmarkers:user_palace' %}">Palaces</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="{% url 'streetmarkers:map' %}">Map</a>
                     </li>
                     <li class="nav-item">
