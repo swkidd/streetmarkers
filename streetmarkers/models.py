@@ -4,6 +4,14 @@ from django.contrib.auth.models import User
 class Palace(models.Model):
     title = models.CharField(max_length=30)
     createdBy = models.ForeignKey(User, on_delete=models.PROTECT)
+    
+    def get_user_path_set(self):
+        return self.path_set.filter(createdBy=self.createdBy) 
+    
+    @property
+    def path_count(self):
+        return len(self.get_user_marker_set())
+    
     def __str__(self):
         return self.title
 
@@ -17,6 +25,15 @@ class Path(models.Model):
     palace = models.ForeignKey(Palace, on_delete=models.PROTECT)
     type = models.ForeignKey(PathType, on_delete=models.PROTECT, null=True)
     createdBy = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
+
+    def get_user_marker_set(self):
+        return self.basemarker_set.filter(createdBy=self.createdBy) 
+    
+    @property
+    def marker_count(self):
+        return len(self.get_user_marker_set())
+
+
     def __str__(self):
         return self.title
 

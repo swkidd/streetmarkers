@@ -1,11 +1,12 @@
 {% extends 'base_generic.html' %}
 
 {% block content %}
-{% for path in paths %}
-<div class="list-group-item">
-    <a href="{% url 'streetmarkers:user_path_detail' path.pk %}">
+<div class="list-group m-4">
+    {% for path in paths %}
+    <a class="list-group-item list-group-item-action text-info" href="{% url 'streetmarkers:user_path_detail' path.pk %}">
         {{ path.title }}
     </a>
+    {% endfor %}
+
 </div>
-{% endfor %}
 {% endblock %}
