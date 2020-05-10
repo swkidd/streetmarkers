@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     
     #local
     'streetmarkers.apps.StreetmarkersConfig',
+    'pegs.apps.PegsConfig',
 ]
 
 MIDDLEWARE = [
