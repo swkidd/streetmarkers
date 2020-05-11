@@ -22,5 +22,6 @@ urlpatterns = [
     path('accounts/registration/', views.RegisterView.as_view(), name="registration"),
     path('accounts/', include('django.contrib.auth.urls')),
     path('', include('streetmarkers.urls')),
+    path('user/pegs/', include('pegs.urls')),
     path('admin/', admin.site.urls),
 ]

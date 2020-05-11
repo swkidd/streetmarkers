@@ -12,52 +12,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
         body {
-            padding-top: 56px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
 
         .jumbotron {
             /*background: url("image.jpg") no-repeat center;*/
         }
+        
+        header {
+            height: 50px;
+        }
 
         footer {
-            position: fixed;
-            bottom: 0px;
-            left: 0px;
-            width: 100%;
+            flex: 0 0 50px;
+            margin-top: auto;
         }
     </style>
 </head>
 
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'streetmarkers:home' %}">MEMNUT</a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
-                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+            <div class="container">
+                <a class="navbar-brand" href="{% url 'streetmarkers:home' %}">MEMNUT</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse"
+                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                    aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
 
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav ml-auto">
-                    {% if user.is_authenticated %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'streetmarkers:user_palace' %}">Palaces</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'streetmarkers:map' %}">Map</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                    </li>
-                    {% else %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{% url 'login' %}">Login</a>
-                    </li>
-                    {% endif %}
-                </ul>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav ml-auto">
+                        {% if user.is_authenticated %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'streetmarkers:user_palace' %}">Palaces</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'streetmarkers:map' %}">Map</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                        </li>
+                        {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'login' %}">Login</a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </div>
             </div>
-        </div>
-    </nav>
+        </nav>
+    </header>
 
     {% block content %}{% endblock %}
 

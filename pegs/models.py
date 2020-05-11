@@ -5,6 +5,10 @@ class PegSystem(models.Model):
     title = models.CharField(max_length=30)
     description = models.TextField()
     createdBy = models.ForeignKey(User, on_delete=models.PROTECT)
+    
+    @property
+    def peg_count(self):
+        return len(self.peg_set)
 
     def __str__(self):
         return self.title

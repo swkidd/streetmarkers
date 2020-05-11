@@ -1,0 +1,26 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+
+<ul class="list-group">
+{% for pegsystem in pegsystem_list %}
+    <li class="list-group-item">
+        {{ pegsystem.title }}
+        <ul class="list-group">
+        {% for peg in pegsystem.peg_set.all %}
+            <li class="list-group-item">
+                {{ peg.content }}
+            </li>
+            {% if peg.popeg %}
+            <li class="list-group-item">
+                {{ peg.popeg.person }}
+                {{ peg.popeg.object }}
+            </li>
+            {% endif %}
+        {% endfor %}
+        </ul>
+    </li>
+{% endfor %}
+</ul>
+
+{% endblock %}
