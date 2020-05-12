@@ -1,26 +1,48 @@
 {% extends 'base_generic.html' %}
 
+{% load static %}
 {% block content %}
 
-<ul class="list-group">
-{% for pegsystem in pegsystem_list %}
-    <li class="list-group-item">
-        {{ pegsystem.title }}
-        <ul class="list-group">
-        {% for peg in pegsystem.peg_set.all %}
-            <li class="list-group-item">
-                {{ peg.content }}
-            </li>
+<content>
+    {% for pegsystem in pegsystem_list %}
+    <table class="table">
+        <h2>{{ pegsystem.title }}</h2>
+        <thead>
+            <tr>
+                <th scope="col">content</th>
+                <th scope="col">person</th>
+                <th scope="col">object</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for peg in pegsystem.peg_set.all %}
             {% if peg.popeg %}
-            <li class="list-group-item">
-                {{ peg.popeg.person }}
-                {{ peg.popeg.object }}
-            </li>
+            <a href="update/popeg/{{ peg.pk }}">
+                <tr>
+                    <th scope="row">{{ peg.content }}</th>
+                    <td>{{ peg.popeg.person }}</td>
+                    <td>{{ peg.popeg.object }}</td>
+                    <td class="btn btn-default btn-sm">
+                        <a href="{% url 'pegs:popeg_update' peg.pk %}">
+                            <img src="{% static 'svg/update.svg' %}">
+                        </a> 
+                        <a href="{% url 'pegs:popeg_delete' peg.pk %}">
+                            <img src="{% static 'svg/delete.svg' %}">
+                        </a> 
+                    </td>
+                </tr>
+            </a>
             {% endif %}
+            {% endfor %}
+        </tbody>
         {% endfor %}
-        </ul>
-    </li>
-{% endfor %}
-</ul>
+    </table>
+</content>
 
+{% endblock %}
+
+{% block script %}
+<script>
+    const update = pk => window.location.href = ``
+</script>
 {% endblock %}

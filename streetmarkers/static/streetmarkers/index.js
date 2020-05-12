@@ -232,10 +232,10 @@ function create_marker(title, infoText) {
 };
 
 // load palace paths dynamically
-function load_paths(palace_id, success, errorDivId) {
+function ajax_load(url, palace_id, success, errorDivId, method = "GET") {
     $.ajax({
-        url: "/ajax/load_paths/",
-        type: "GET", 
+        url: url,
+        type: method, 
         data: { palace_id }, 
         success: success,
         error: function (xhr, errmsg, err) {
@@ -258,7 +258,7 @@ $("#palace-list").one('click', event => {
         })
     }
     const errorDivId = 'menu-modal-error'
-    load_paths(palaceId, success, errorDivId)
+    ajax_load('/ajax/load_paths', palaceId, success, errorDivId)
 })
 
 $("#modal-form").on('submit', event => {
