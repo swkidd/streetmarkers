@@ -20,7 +20,7 @@ class PegType(models.Model):
 
 class Peg(models.Model):
     content = models.CharField(max_length=30)
-    notes = models.TextField(null=True)
+    notes = models.TextField(null=True, blank=True)
     pegSystem = models.ForeignKey(PegSystem, on_delete=models.CASCADE)
     pegType = models.ForeignKey(PegType, on_delete=models.PROTECT, null=True)
     def __str__(self):

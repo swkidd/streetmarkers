@@ -12,6 +12,11 @@
                 <th scope="col">content</th>
                 <th scope="col">person</th>
                 <th scope="col">object</th>
+                <th class="btn btn-default btn-sm">
+                    <a href="{% url 'pegs:popeg_create' pegsystem.pk %}">
+                        <img src="{% static 'svg/create.svg' %}">
+                    </a>
+                </th>
             </tr>
         </thead>
         <tbody>
@@ -25,10 +30,10 @@
                     <td class="btn btn-default btn-sm">
                         <a href="{% url 'pegs:popeg_update' peg.pk %}">
                             <img src="{% static 'svg/update.svg' %}">
-                        </a> 
+                        </a>
                         <a href="{% url 'pegs:popeg_delete' peg.pk %}">
                             <img src="{% static 'svg/delete.svg' %}">
-                        </a> 
+                        </a>
                     </td>
                 </tr>
             </a>
