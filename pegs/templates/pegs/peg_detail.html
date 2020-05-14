@@ -5,18 +5,39 @@
 
 <content>
     {% for pegsystem in pegsystem_list %}
+    <h2>
+        {{ user.username|title }}'s Peg Systems
+        <span class="btn btn-default btn-sm">
+            <a href="{% url 'pegs:pegsystem_create' %}">
+                <img src="{% static 'svg/create.svg' %}">
+            </a>
+        </span>
+    </h2>
     <table class="table">
-        <h2>{{ pegsystem.title }}</h2>
+        <h3>
+            {{ pegsystem.title }}
+            <span class="btn btn-default btn-sm">
+                <a href="{% url 'pegs:pegsystem_update' pegsystem.pk %}">
+                    <img src="{% static 'svg/update.svg' %}">
+                </a>
+            </span>
+            <span class="btn btn-default btn-sm">
+                <a href="{% url 'pegs:pegsystem_delete' pegsystem.pk %}">
+                    <img src="{% static 'svg/delete.svg' %}">
+                </a>
+            </span>
+        </h3>
+        <h6>{{ pegsystem.description }}</h6>
         <thead>
             <tr>
                 <th scope="col">content</th>
                 <th scope="col">person</th>
                 <th scope="col">object</th>
-                <th class="btn btn-default btn-sm">
+                <td class="btn btn-default btn-sm">
                     <a href="{% url 'pegs:popeg_create' pegsystem.pk %}">
                         <img src="{% static 'svg/create.svg' %}">
                     </a>
-                </th>
+                </td>
             </tr>
         </thead>
         <tbody>
@@ -31,6 +52,8 @@
                         <a href="{% url 'pegs:popeg_update' peg.pk %}">
                             <img src="{% static 'svg/update.svg' %}">
                         </a>
+                    </td>
+                    <td class="btn btn-default btn-sm">
                         <a href="{% url 'pegs:popeg_delete' peg.pk %}">
                             <img src="{% static 'svg/delete.svg' %}">
                         </a>

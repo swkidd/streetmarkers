@@ -40,6 +40,10 @@ const changeMaps = (markers, map) => {
 
 function initMap() {
     var tokyo = { lat: 35.689722, lng: 139.692222 };
+    
+    /* load palace detail page into iframe menu modal */
+
+    $("#menu-modal").load("/user/palace/")
 
     /* create new panoramma to support picture in picture map */
     panorama = new google.maps.StreetViewPanorama(panoDiv, {
@@ -312,7 +316,7 @@ function CreateMenuControl(controlDiv, map) {
     controlUI.style.marginBottom = '22px';
     controlUI.style.textAlign = 'center';
     controlUI.style.userSelect = "none"
-    controlUI.title = 'Click to add a marker to the map';
+    controlUI.title = 'View menu';
     controlDiv.appendChild(controlUI);
 
     var controlText = document.createElement('div');

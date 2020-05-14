@@ -1,9 +1,15 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+class PegType(models.Model):
+    typeName = models.CharField(max_length=30)
+    def __str__(self):
+        return self.typeName
+
 class PegSystem(models.Model):
     title = models.CharField(max_length=30)
     description = models.TextField()
+    pegType = models.ForeignKey(PegType, on_delete=models.PROTECT, null=True)
     createdBy = models.ForeignKey(User, on_delete=models.PROTECT)
     
     @property
@@ -12,11 +18,6 @@ class PegSystem(models.Model):
 
     def __str__(self):
         return self.title
-
-class PegType(models.Model):
-    typeName = models.CharField(max_length=30)
-    def __str__(self):
-        return self.typeName
 
 class Peg(models.Model):
     content = models.CharField(max_length=30)

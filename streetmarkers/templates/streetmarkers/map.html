@@ -93,7 +93,7 @@
 
 <body>
     <div id="menu-modal" style="display: none;">
-        <!-- path info -->
+        <!-- path info
         {% for palace in palaces %}
         <div 
             id="palace-list"
@@ -103,11 +103,10 @@
             class="list-group d-flex justify-content-between align-items-center"
         >
             {{ palace.title }}
-            <!-- marker info -->
             <div class="collapse" id="paths-{{palace.id}}"></div>
         </div>
         {% endfor %}
-        <div id="menu-modal-error"></div>
+        <div id="menu-modal-error"></div> -->
     </div>
     <div id="floating-modal" style="display: none;">
         <form action="/create_marker/" method="POST" id="modal-form">
@@ -127,7 +126,7 @@
         {{marker.title}}
     </map-marker>
     {% endfor %} -->
-    <script src="{% static 'streetmarkers/index.js' %}"></script>
+    <script src="{% static 'streetmarkers/map.js' %}"></script>
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9jTGYNpWqhcKSA3dI_atkepXqAIvfnck&callback=initMap"></script>
 </body>
