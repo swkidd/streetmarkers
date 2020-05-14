@@ -27,7 +27,7 @@ class Path(models.Model):
     createdBy = models.ForeignKey(User, on_delete=models.PROTECT, null=True)
 
     def get_user_marker_set(self):
-        return self.basemarker_set.filter(createdBy=self.createdBy) 
+        return self.basemarker_set.filter(path=self)
     
     @property
     def marker_count(self):

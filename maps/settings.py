@@ -136,3 +136,6 @@ LOGIN_URL = '/accounts/login/'
 
 #Temporary log password reset emails to console
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+#Clickjacking protection allow same origin (allows iframes)
+X_FRAME_OPTIONS = 'SAMEORIGIN'

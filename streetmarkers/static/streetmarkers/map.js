@@ -40,10 +40,15 @@ const changeMaps = (markers, map) => {
 
 function initMap() {
     var tokyo = { lat: 35.689722, lng: 139.692222 };
-    
-    /* load palace detail page into iframe menu modal */
 
-    $("#menu-modal").load("/user/palace/")
+    $("#menu-modal").dialog({
+        autoOpen: false,
+        maxWidth: 1200,
+        maxHeight: 500,
+        width: '50%',
+        height: 500,
+        modal: true,
+    })
 
     /* create new panoramma to support picture in picture map */
     panorama = new google.maps.StreetViewPanorama(panoDiv, {
@@ -163,7 +168,7 @@ function initMap() {
             const div = panoLBControls.removeAt(index)
             mapContainerDiv.append(div)
         }
-        
+
         mapDiv.style['border-radius'] = "0px"
         mapDiv.style['border'] = "none"
 
@@ -214,11 +219,11 @@ const addMarker = (title, infoText) => {
 }
 
 // add marker to database
-function create_marker(title, infoText) {
+function create_marker(title, infoText, palace, path) {
     $.ajax({
         url: "/ajax/create_marker/", // the endpoint
         type: "POST", // http method
-        data: { title, infoText, lat, lng }, // data sent with the post request
+        data: { title, infoText, lat, lng, palace, path }, // data sent with the post request
 
         // handle a successful response
         success: function (json) {
@@ -239,39 +244,40 @@ function create_marker(title, infoText) {
 function ajax_load(url, palace_id, success, errorDivId, method = "GET") {
     $.ajax({
         url: url,
-        type: method, 
-        data: { palace_id }, 
+        type: method,
+        data: { palace_id },
         success: success,
         error: function (xhr, errmsg, err) {
             $(`#${errorDivId}`).html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: " + errmsg +
-                " <a href='#' class='close'>&times;</a></div>"); 
-            console.log(xhr.status + ": " + xhr.responseText); 
+                " <a href='#' class='close'>&times;</a></div>");
+            console.log(xhr.status + ": " + xhr.responseText);
         }
     });
 };
 
-$("#palace-list").one('click', event => {
-    const palaceId = event.target.getAttribute('data-palace-id')
-    const success = paths => {
-        console.log(paths)
-        paths.forEach(path => {
-            const div = document.createElement('div')
-            div.classList = ['list-group-item']
-            div.innerText = path.title
-            $(`#paths-${palaceId}`).append(div)
-        })
-    }
-    const errorDivId = 'menu-modal-error'
-    ajax_load('/ajax/load_paths', palaceId, success, errorDivId)
-})
+/* using iframe instead */
+// $("#palace-list").one('click', event => {
+//     const palaceId = event.target.getAttribute('data-palace-id')
+//     const success = paths => {
+//         console.log(paths)
+//         paths.forEach(path => {
+//             const div = document.createElement('div')
+//             div.classList = ['list-group-item']
+//             div.innerText = path.title
+//             $(`#paths-${palaceId}`).append(div)
+//         })
+//     }
+//     const errorDivId = 'menu-modal-error'
+//     ajax_load('/ajax/load_paths', palaceId, success, errorDivId)
+// })
 
 $("#modal-form").on('submit', event => {
     event.preventDefault()
-    const title = document.getElementById("modal-form-title").value
-    const infoText = document.getElementById("modal-form-infoText").value
-    document.getElementById("modal-form-title").value = ""
-    document.getElementById("modal-form-infoText").value = ""
-    create_marker(title, infoText)
+    const title = $('#id_title').val()
+    const infoText = $('#id_infoText').val()
+    const palace = $('#id_palace').val()
+    const path = $('#id_path').val()
+    create_marker(title, infoText, palace, path)
 })
 
 function CreateMarkerControl(controlDiv, map) {
@@ -330,11 +336,7 @@ function CreateMenuControl(controlDiv, map) {
     controlUI.appendChild(controlText);
 
     controlUI.addEventListener('click', function () {
-        if ($("#menu-modal").is(":visible")) {
-            hideMenu()
-        } else {
-            showMenu()
-        }
+        $('#menu-modal').dialog('open')
     });
 }
 

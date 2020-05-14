@@ -67,22 +67,8 @@
         }
 
         #menu-modal {
-            display: none;
-            position: absolute;
-            min-width: 250px;
-            max-height: 70vh;
-            min-height: 40vh;
-            overflow: scroll;
-            top: 50%;
-            left: 50%;
-            z-index: 5;
-            background-color: #fff;
-            padding: 5px;
-            border: 1px solid #999;
-            text-align: center;
-            font-family: 'Roboto', 'sans-serif';
-            line-height: 30px;
-            transform: translate(-50%, -50%);
+            width: 100%;
+            height: 100%;
         }
 
         .info-window {
@@ -92,7 +78,7 @@
 </head>
 
 <body>
-    <div id="menu-modal" style="display: none;">
+    <iframe src="{% url 'streetmarkers:user_palace' %}" id="menu-modal" style="display: none;">
         <!-- path info
         {% for palace in palaces %}
         <div 
@@ -107,7 +93,7 @@
         </div>
         {% endfor %}
         <div id="menu-modal-error"></div> -->
-    </div>
+    </iframe>
     <div id="floating-modal" style="display: none;">
         <form action="/create_marker/" method="POST" id="modal-form">
             {% csrf_token %}
@@ -121,11 +107,12 @@
         <div id="map" class="big-map"></div>
         <div id="pano" class="big-map" style="display: none;"></div>
     </div>
-    <!-- {% for marker in markers %}
+    {% for marker in markers %}
     <map-marker hidden data-lat="{{ marker.lat }}" data-lng="{{ marker.lng }}" data-infoText="{{ marker.infoText }}">
         {{marker.title}}
     </map-marker>
-    {% endfor %} -->
+    {% endfor %}
+    <script src="{% static 'streetmarkers/jquery-ui.min.js' %}"></script>
     <script src="{% static 'streetmarkers/map.js' %}"></script>
     <script async defer
         src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD9jTGYNpWqhcKSA3dI_atkepXqAIvfnck&callback=initMap"></script>

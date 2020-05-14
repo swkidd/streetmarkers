@@ -1,17 +1,18 @@
 import json
 from django.conf import settings
 from django.views.generic.base import TemplateView
-from django.views.generic import ListView, DetailView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.shortcuts import render
 from django.http import HttpResponse
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.urls import reverse_lazy
 
-from .models import Palace, Path, BasicMarker
-from .forms import PalaceForm, PathForm, BasicMarkerForm
+from .models import Palace, Path, BasicMarker, MarkerType
+from .forms import BasicMarkerForm
 
 ### logging ###
 import logging
@@ -38,7 +39,6 @@ logging.config.dictConfig(LOGGING)
 ######
 
 #import markdown
-
 
 class UserPalaceView(LoginRequiredMixin, ListView):
     model = Palace
@@ -85,12 +85,7 @@ class MapPageView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['basicMarkerForm'] = BasicMarkerForm
-        context['basicPathForm'] = PathForm
-        context['palaceForm'] = PalaceForm
-
         context['palaces'] = Palace.objects.filter(createdBy=self.request.user)
-        logging.info(self.request.user)
-        logging.info(context['palaces'])
         return context
 
 
@@ -101,9 +96,21 @@ def create_marker(request):
         infoText = request.POST.get('infoText')
         lat = request.POST.get('lat')
         lng = request.POST.get('lng')
+        palace = Palace.objects.get(pk=request.POST.get('palace'))
+        path = Path.objects.get(pk=request.POST.get('path'))
+        type = MarkerType.objects.get(typeName='basic')
         response_data = {}
 
-        marker = BasicMarker(title=title, infoText=infoText, lat=lat, lng=lng)
+        marker = BasicMarker(
+            createdBy=request.user, 
+            title=title, 
+            palace=palace, 
+            path=path, 
+            type=type, 
+            infoText=infoText, 
+            lat=lat, 
+            lng=lng
+        )
         marker.save()
 
         response_data['result'] = 'Create post successful!'
@@ -147,3 +154,65 @@ def load_paths(request):
             json.dumps({"nothing to see": "this isn't happening"}),
             content_Type="application/json"
         )
+
+
+#Create Views
+# assert user is createdBy user
+
+class PalaceCreate(LoginRequiredMixin, CreateView):
+    model = Palace 
+    fields = ['title']
+    template_name_suffix = '_create_form'
+    success_url = reverse_lazy('streetmarkers:user_palace')
+
+    def form_valid(self, form):
+        form.instance.createdBy = self.request.user
+        return super().form_valid(form)
+
+class PathCreate(LoginRequiredMixin, CreateView):
+    model = Path 
+    fields = ['title', 'type']
+    template_name_suffix = '_create_form'
+    success_url = reverse_lazy('streetmarkers:user_palace')
+
+    def form_valid(self, form):
+        palace = Palace.objects.get(pk=self.kwargs['pk'])
+        form.instance.palace = palace
+        form.instance.createdBy = self.request.user
+        return super().form_valid(form)
+
+#Update Views
+# assert user is createdBy user
+
+class PalaceUpdate(LoginRequiredMixin, UpdateView):
+    model = Palace 
+    fields = ['title']
+    template_name_suffix = '_update_form'
+    success_url = reverse_lazy('streetmarkers:user_palace')
+
+class PathUpdate(LoginRequiredMixin, UpdateView):
+    model = Path 
+    fields = ['title', 'type']
+    template_name_suffix = '_update_form'
+    success_url = reverse_lazy('streetmarkers:user_palace')
+
+class BasicMarkerUpdate(LoginRequiredMixin, UpdateView):
+    model = BasicMarker 
+    fields = ['title', 'path', 'infoText']
+    template_name_suffix = '_update_form'
+    success_url = reverse_lazy('streetmarkers:user_palace')
+
+#Delete Views
+# assert user is createdBy user
+
+class PalaceDelete(LoginRequiredMixin, DeleteView):
+    model = Palace 
+    success_url = reverse_lazy('streetmarkers:user_palace')
+
+class PathDelete(LoginRequiredMixin, DeleteView):
+    model = Path 
+    success_url = reverse_lazy('streetmarkers:user_palace')
+
+class BasicMarkerDelete(LoginRequiredMixin, DeleteView):
+    model = BasicMarker 
+    success_url = reverse_lazy('streetmarkers:user_palace')

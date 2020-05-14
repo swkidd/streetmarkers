@@ -1,22 +1,65 @@
 {% extends 'base_generic.html' %}
 
+{% load static %}
+
 {% block content %}
-<h3 class="m-4 ">{{ user.username|title }}'s Palaces</h1>
-
-
+<div id="palaces">
+  <h3 class="m-4 ">
+    {{ user.username|title }}'s Palaces
+    <span class="btn btn-default btn-sm">
+      <a href="{% url 'streetmarkers:palace_create' %}">
+        <img src="{% static 'svg/create.svg' %}">
+      </a>
+    </span>
+  </h3>
   {% if palace_list %}
   <ul class="list-group">
     {% for palace in palace_list %}
-    <li class="list-group-item list-group-item-action text-info">
+    <li class="list-group-item">
       {{ palace.title }}
+      <span class="btn btn-default btn-sm">
+        <a href="{% url 'streetmarkers:palace_update' palace.pk %}">
+          <img src="{% static 'svg/update.svg' %}">
+        </a>
+      </span>
+      <span class="btn btn-default btn-sm">
+        <a href="{% url 'streetmarkers:palace_delete' palace.pk %}">
+          <img src="{% static 'svg/delete.svg' %}">
+        </a>
+      </span>
+      <span class="btn btn-default btn-sm">
+        <a href="{% url 'streetmarkers:path_create' palace.pk %}">
+          <img src="{% static 'svg/add.svg' %}">
+        </a>
+      </span>
       <ul class="list-group">
         {% for path in palace.get_user_path_set %}
         <li class="list-group-item text-info">
           {{ path.title }}
+          <span class="btn btn-default btn-sm">
+            <a href="{% url 'streetmarkers:path_update' path.pk %}">
+              <img src="{% static 'svg/update.svg' %}">
+            </a>
+          </span>
+          <span class="btn btn-default btn-sm">
+            <a href="{% url 'streetmarkers:path_delete' path.pk %}">
+              <img src="{% static 'svg/delete.svg' %}">
+            </a>
+          </span>
           <ul class="list-group">
             {% for marker in path.get_user_marker_set %}
             <li class="list-group-item list-group-flush">
               {{ marker.title }}
+              <span class="btn btn-default btn-sm">
+                <a href="{% url 'streetmarkers:marker_update' marker.pk %}">
+                  <img src="{% static 'svg/update.svg' %}">
+                </a>
+              </span>
+              <span class="btn btn-default btn-sm">
+                <a href="{% url 'streetmarkers:marker_delete' marker.pk %}">
+                  <img src="{% static 'svg/delete.svg' %}">
+                </a>
+              </span>
             </li>
             {% endfor %}
           </ul>
@@ -26,8 +69,8 @@
       {% endfor %}
     </li>
   </ul>
-
   {% else %}
   <p>You don't have any palaces yet. Why don't you <a href="{% url 'streetmarkers:map' %}">create</a> one?</p>
   {% endif %}
-  {% endblock %}
+</div>
+{% endblock %}
