@@ -38,7 +38,7 @@ LOGGING = {
 logging.config.dictConfig(LOGGING)
 ######
 
-#import markdown
+import markdown
 
 class UserPalaceView(LoginRequiredMixin, ListView):
     model = Palace
@@ -85,6 +85,15 @@ class MapPageView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['basicMarkerForm'] = BasicMarkerForm
+        context['markers'] = [ {
+            'title': m.title,
+            'palace': m.palace,
+            'path': m.path,
+            'type': m.type,
+            'lat': m.lat,
+            'lng': m.lng,
+            'infoText': markdown.markdown(m.infoText, safe_mode=True)
+        } for m in BasicMarker.objects.all()]
         context['palaces'] = Palace.objects.filter(createdBy=self.request.user)
         return context
 

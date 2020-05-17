@@ -39,7 +39,8 @@ const changeMaps = (markers, map) => {
 }
 
 function initMap() {
-    var tokyo = { lat: 35.689722, lng: 139.692222 };
+    //var tokyo = { lat: 35.689722, lng: 139.692222 };
+    var uozu = { lat: 36.822166, lng: 137.401032 };
 
     $("#menu-modal").dialog({
         autoOpen: false,
@@ -59,7 +60,7 @@ function initMap() {
 
     // Set up the map
     map = new google.maps.Map(mapDiv, {
-        center: tokyo,
+        center: uozu,
         zoom: 18,
         mapTypeId: 'satellite',
         streetView: panorama,

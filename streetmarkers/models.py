@@ -43,7 +43,7 @@ class MarkerType(models.Model):
         return self.typeName
 
 class BaseMarker(models.Model):
-    title = models.CharField(max_length=30)
+    title = models.CharField(max_length=300)
     lat = models.FloatField()
     lng = models.FloatField()
     path = models.ForeignKey(Path, on_delete=models.PROTECT, null=True)
