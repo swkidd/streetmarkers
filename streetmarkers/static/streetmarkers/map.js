@@ -101,10 +101,17 @@ function initMap() {
         const lat = parseFloat(m.getAttribute('data-lat'))
         const infoText = m.getAttribute('data-infoText')
         const title = m.innerText
+        console.log(title.length)
+        const label = title.length < 2 ? {
+            text: title,
+            fontWeight: 'bold',
+            fontSize: '1.2em',
+        } : ''
         const marker = new google.maps.Marker({
             position: { lat, lng },
             map,
             title,
+            label,
         })
         const infoWindow = new google.maps.InfoWindow({
             content: `<p id="info-window">${infoText}</p>`,

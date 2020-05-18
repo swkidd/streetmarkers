@@ -108,9 +108,7 @@
         <div id="pano" class="big-map" style="display: none;"></div>
     </div>
     {% for marker in markers %}
-    <map-marker hidden data-lat="{{ marker.lat }}" data-lng="{{ marker.lng }}" data-infoText="{{ marker.infoText }}">
-        {{marker.title}}
-    </map-marker>
+    <map-marker hidden data-lat="{{ marker.lat }}" data-lng="{{ marker.lng }}" data-infoText="{{ marker.infoText }}">{{marker.title}}</map-marker>
     {% endfor %}
     <script src="{% static 'streetmarkers/jquery-ui.min.js' %}"></script>
     <script src="{% static 'streetmarkers/map.js' %}"></script>
