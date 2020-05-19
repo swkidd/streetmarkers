@@ -8,7 +8,6 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.clickjacking import xframe_options_sameorigin
 from django.urls import reverse_lazy
 
 from .models import Palace, Path, BasicMarker, MarkerType
@@ -18,8 +17,6 @@ from .forms import BasicMarkerForm
 import logging
 import logging.config
 import sys
-from django.urls.base import reverse
-from django.db.models import Q
 
 LOGGING = {
     'version': 1,
@@ -139,21 +136,20 @@ def create_marker(request):
             content_Type="application/json"
         )
 
-
+# loads all markers created by the logged in user
 @login_required
-def load_paths(request):
+def load_markers(request):
     if request.method == 'GET':
-        palace_id = request.GET.get('palace_id')
-        paths = Path.objects.filter(palace_id=palace_id)
-        response_data = [
-            {
-                'title': path.title,
-                'palace_title': path.palace.title,
-                'palace_id': path.palace.id,
-                'type': path.type.typeName,
-            } for path in paths
-        ]
-        logging.info(palace_id)
+        basicMarkers = BasicMarker.objects.filter(createdBy=request.user) 
+        markers = [ {
+            'infoText': m.infoText,
+            'lat': m.basemarker_ptr.lat,
+            'lng': m.basemarker_ptr.lng,
+            'title': m.basemarker_ptr.title,
+            'path': m.basemarker_ptr.path.title,
+            'palace': m.basemarker_ptr.palace.title,
+        } for m in basicMarkers ]
+        response_data = json.dumps(markers)
         return HttpResponse(
             json.dumps(response_data),
             content_type="application/json"

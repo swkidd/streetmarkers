@@ -17,5 +17,5 @@ urlpatterns = [
     path('user/markers/delete/<int:pk>', views.BasicMarkerDelete.as_view(), name='marker_delete'),
     path('map/', views.MapPageView.as_view(), name='map'),
     path('ajax/create_marker/', views.create_marker, name='create_marker'),
-    path('ajax/load_paths/', views.load_paths, name='load_paths')
+    path('ajax/load_markers/', views.load_markers, name='load_markers')
 ]

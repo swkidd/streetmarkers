@@ -78,22 +78,7 @@
 </head>
 
 <body>
-    <iframe src="{% url 'streetmarkers:user_palace' %}" id="menu-modal" style="display: none;">
-        <!-- path info
-        {% for palace in palaces %}
-        <div 
-            id="palace-list"
-            data-toggle="collapse" 
-            data-target="#paths-{{palace.id}}"
-            data-palace-id="{{palace.id}}"
-            class="list-group d-flex justify-content-between align-items-center"
-        >
-            {{ palace.title }}
-            <div class="collapse" id="paths-{{palace.id}}"></div>
-        </div>
-        {% endfor %}
-        <div id="menu-modal-error"></div> -->
-    </iframe>
+    <iframe src="{% url 'streetmarkers:user_palace' %}" id="menu-modal" style="display: none;"></iframe>
     <div id="floating-modal" style="display: none;">
         <form action="/create_marker/" method="POST" id="modal-form">
             {% csrf_token %}
@@ -107,9 +92,12 @@
         <div id="map" class="big-map"></div>
         <div id="pano" class="big-map" style="display: none;"></div>
     </div>
-    {% for marker in markers %}
-    <map-marker hidden data-lat="{{ marker.lat }}" data-lng="{{ marker.lng }}" data-infoText="{{ marker.infoText }}">{{marker.title}}</map-marker>
-    {% endfor %}
+    <div id="marker-container">
+        {% for marker in markers %}
+        <map-marker hidden data-lat="{{ marker.lat }}" data-lng="{{ marker.lng }}"
+            data-infoText="{{ marker.infoText }}">{{marker.title}}</map-marker>
+        {% endfor %}
+    </div>
     <script src="{% static 'streetmarkers/jquery-ui.min.js' %}"></script>
     <script src="{% static 'streetmarkers/map.js' %}"></script>
     <script async defer
