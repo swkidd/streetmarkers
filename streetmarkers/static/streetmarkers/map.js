@@ -106,6 +106,19 @@ function initMap() {
         overviewMapControl: true,
     });
 
+    // add drawing functionality
+
+    let drawingManager = new google.maps.drawing.DrawingManager({
+        drawingControl: true,
+        drawingControlOptions: {
+            position: google.maps.ControlPosition.TOP_CENTER,
+            drawingModes: ['circle', 'polygon', 'rectangle']
+        },
+    });
+    drawingManager.setMap(map);
+
+    google.maps.event.addListener(drawingManager, 'overlaycomplete', e => e.overlay.setMap(null))
+
     // add menu button to map view
     const addMenuDiv = document.createElement("div")
     addMenuDiv.style.width = "40px"
