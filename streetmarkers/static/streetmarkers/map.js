@@ -234,7 +234,7 @@ function initMap() {
         lng = pos.lng()
 
         // dont reposition the map while peg man is being dragged
-        if (!pegMovingInSV) {
+        if (panorama.getVisible() && !pegMovingInSV) {
             map.setCenter(pos)
         }
     })
