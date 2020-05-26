@@ -370,7 +370,7 @@ function RefreshMarkersControl(controlDiv, map) {
     controlUI.style.marginBottom = '22px';
     controlUI.style.textAlign = 'center';
     controlUI.style.userSelect = "none"
-    controlUI.title = 'Click to add a marker to the map';
+    controlUI.title = 'Click to reload map markers';
     controlDiv.appendChild(controlUI);
 
     var controlText = document.createElement('div');
