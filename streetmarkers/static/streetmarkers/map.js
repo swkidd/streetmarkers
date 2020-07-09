@@ -72,8 +72,7 @@ const create_markers = query => [...document.querySelectorAll(query)].map(m => {
 
 
 function initMap() {
-    //var tokyo = { lat: 35.689722, lng: 139.692222 };
-    var uozu = { lat: 36.822166, lng: 137.401032 };
+    var tokyo = { lat: 35.689722, lng: 139.692222 };
 
     $("#menu-modal").dialog({
         autoOpen: false,
@@ -93,7 +92,7 @@ function initMap() {
 
     // Set up the map
     map = new google.maps.Map(mapDiv, {
-        center: uozu,
+        center: tokyo,
         zoom: 18,
         mapTypeId: 'satellite',
         streetView: panorama,
@@ -108,16 +107,16 @@ function initMap() {
 
     // add drawing functionality
 
-    let drawingManager = new google.maps.drawing.DrawingManager({
-        drawingControl: true,
-        drawingControlOptions: {
-            position: google.maps.ControlPosition.TOP_CENTER,
-            drawingModes: ['circle', 'polygon', 'rectangle']
-        },
-    });
-    drawingManager.setMap(map);
+    // let drawingManager = new google.maps.drawing.DrawingManager({
+    //     drawingControl: true,
+    //     drawingControlOptions: {
+    //         position: google.maps.ControlPosition.TOP_CENTER,
+    //         drawingModes: ['circle', 'polygon', 'rectangle']
+    //     },
+    // });
+    // drawingManager.setMap(map);
 
-    google.maps.event.addListener(drawingManager, 'overlaycomplete', e => e.overlay.setMap(null))
+    // google.maps.event.addListener(drawingManager, 'overlaycomplete', e => e.overlay.setMap(null))
 
     // add menu button to map view
     const addMenuDiv = document.createElement("div")
@@ -126,7 +125,7 @@ function initMap() {
     addMenuDiv.style.margin = "10px"
     const menuObj = new CreateMenuControl(addMenuDiv, map)
     addMenuDiv.index = 1
-    map.controls[google.maps.ControlPosition.RIGHT_TOP].push(addMenuDiv);
+    map.controls[google.maps.ControlPosition.LEFT_TOP].push(addMenuDiv);
 
     // add create marker element to panorama view
     const addMarkerDiv = document.createElement("div")
