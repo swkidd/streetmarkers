@@ -345,14 +345,31 @@ function CreateMenuControl(controlDiv, map) {
     // // controlUI.title = 'palaces dropdown';
     // controlUI.classList.add("dropdown-menu")
     // controlDiv.appendChild(controlUI);
+    const dropdownButton = document.createElement('button')
+    dropdownButton.classList.add("btn")
+    dropdownButton.classList.add("btn-secondary")
+    dropdownButton.classList.add("dropdown-toggle")
+    dropdownButton.type = "button"
+    dropdownButton.setAttribute("data-toggle", "dropdown")
+    dropdownButton.setAttribute("aria-haspopup", "true")
+    dropdownButton.setAttribute("aria-expanded", "false")
+    dropdownButton.setAttribute("id", "dropdownMenu")
+    dropdownButton.innerText = "Palaces"
+    controlDiv.appendChild(dropdownButton);
+
+    const menuContainer = document.createElement('div');
+    menuContainer.classList.add("dropdown-menu")
+    menuContainer.setAttribute("aria-labelledby", "dropdownMenu")
+    controlDiv.appendChild(menuContainer);
 
     const success = response => {
         const ms = JSON.parse(response)
         ms.forEach(e => {
-            var div = document.createElement('div');
-            div.innerText = e.title
-            div.classList.add("dropdown-item")
-            controlDiv.appendChild(div);
+            var menuItem = document.createElement('button');
+            menuItem.innerText = e.title
+            menuItem.classList.add("dropdown-item")
+            menuItem.setAttribute('type', 'button')
+            menuContainer.appendChild(menuItem);
         })
     }
     const errorDivId = 'menu-modal-error'
