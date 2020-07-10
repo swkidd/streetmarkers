@@ -160,6 +160,24 @@ def load_markers(request):
             content_Type="application/json"
         )
 
+@login_required
+def get_palaces(request):
+    if request.method == 'GET':
+        palaces = Palace.objects.filter(createdBy=request.user) 
+        palaces = [ {
+            'title': m.title,
+        } for m in palaces]
+        response_data = json.dumps(palaces)
+        return HttpResponse(
+            json.dumps(response_data),
+            content_type="application/json"
+        )
+    else:
+        return HttpResponse(
+            json.dumps({"nothing to see": "this isn't happening"}),
+            content_Type="application/json"
+        )
+
 
 #Create Views
 # assert user is createdBy user

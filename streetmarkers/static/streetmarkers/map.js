@@ -120,12 +120,13 @@ function initMap() {
 
     // add menu button to map view
     const addMenuDiv = document.createElement("div")
-    addMenuDiv.style.width = "40px"
-    addMenuDiv.style.height = "40px"
+    // addMenuDiv.style.width = "80px"
+    // addMenuDiv.style.height = "40px"
     addMenuDiv.style.margin = "10px"
     const menuObj = new CreateMenuControl(addMenuDiv, map)
     addMenuDiv.index = 1
-    map.controls[google.maps.ControlPosition.LEFT_TOP].push(addMenuDiv);
+    addMenuDiv.classList.add('dropdown')
+    map.controls[google.maps.ControlPosition.TOP_CENTER].push(addMenuDiv);
 
     // add create marker element to panorama view
     const addMarkerDiv = document.createElement("div")
@@ -332,31 +333,30 @@ function CreateMarkerControl(controlDiv, map) {
 }
 
 function CreateMenuControl(controlDiv, map) {
-    var controlUI = document.createElement('div');
-    controlUI.style.backgroundColor = 'rgb(255, 255, 255)';
-    controlUI.style.border = '0px';
-    controlUI.style.borderRadius = '2px';
-    controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-    controlUI.style.cursor = 'pointer';
-    controlUI.style.marginBottom = '22px';
-    controlUI.style.textAlign = 'center';
-    controlUI.style.userSelect = "none"
-    controlUI.title = 'View menu';
-    controlDiv.appendChild(controlUI);
+    // var controlUI = document.createElement('div');
+    // // controlUI.style.backgroundColor = 'rgb(255, 255, 255)';
+    // // controlUI.style.border = '0px';
+    // // controlUI.style.borderRadius = '2px';
+    // // controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
+    // // controlUI.style.cursor = 'pointer';
+    // // controlUI.style.marginBottom = '22px';
+    // // controlUI.style.textAlign = 'center';
+    // // controlUI.style.userSelect = "none"
+    // // controlUI.title = 'palaces dropdown';
+    // controlUI.classList.add("dropdown-menu")
+    // controlDiv.appendChild(controlUI);
 
-    var controlText = document.createElement('div');
-    controlText.style.color = 'rgb(66, 66, 66)';
-    controlText.style.fontFamily = 'Roboto,Arial,sans-serif';
-    controlText.style.fontSize = '16px';
-    controlText.style.lineHeight = '38px';
-    controlText.style.paddingLeft = '5px';
-    controlText.style.paddingRight = '5px';
-    controlText.innerHTML = 'M';
-    controlUI.appendChild(controlText);
-
-    controlUI.addEventListener('click', function () {
-        $('#menu-modal').dialog('open')
-    });
+    const success = response => {
+        const ms = JSON.parse(response)
+        ms.forEach(e => {
+            var div = document.createElement('div');
+            div.innerText = e.title
+            div.classList.add("dropdown-item")
+            controlDiv.appendChild(div);
+        })
+    }
+    const errorDivId = 'menu-modal-error'
+    ajax_load('/ajax/get_palaces', success, errorDivId)
 }
 
 function RefreshMarkersControl(controlDiv, map) {
