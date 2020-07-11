@@ -120,12 +120,9 @@ function initMap() {
 
     // add menu button to map view
     const addMenuDiv = document.createElement("div")
-    // addMenuDiv.style.width = "80px"
-    // addMenuDiv.style.height = "40px"
     addMenuDiv.style.margin = "10px"
     const menuObj = new CreateMenuControl(addMenuDiv, map)
     addMenuDiv.index = 1
-    addMenuDiv.classList.add('dropdown')
     map.controls[google.maps.ControlPosition.TOP_CENTER].push(addMenuDiv);
 
     // add create marker element to panorama view
@@ -332,44 +329,89 @@ function CreateMarkerControl(controlDiv, map) {
     });
 }
 
-function CreateMenuControl(controlDiv, map) {
-    // var controlUI = document.createElement('div');
-    // // controlUI.style.backgroundColor = 'rgb(255, 255, 255)';
-    // // controlUI.style.border = '0px';
-    // // controlUI.style.borderRadius = '2px';
-    // // controlUI.style.boxShadow = '0 2px 6px rgba(0,0,0,.3)';
-    // // controlUI.style.cursor = 'pointer';
-    // // controlUI.style.marginBottom = '22px';
-    // // controlUI.style.textAlign = 'center';
-    // // controlUI.style.userSelect = "none"
-    // // controlUI.title = 'palaces dropdown';
-    // controlUI.classList.add("dropdown-menu")
-    // controlDiv.appendChild(controlUI);
-    const dropdownButton = document.createElement('button')
-    dropdownButton.classList.add("btn")
-    dropdownButton.classList.add("btn-secondary")
-    dropdownButton.classList.add("dropdown-toggle")
-    dropdownButton.type = "button"
-    dropdownButton.setAttribute("data-toggle", "dropdown")
-    dropdownButton.setAttribute("aria-haspopup", "true")
-    dropdownButton.setAttribute("aria-expanded", "false")
-    dropdownButton.setAttribute("id", "dropdownMenu")
-    dropdownButton.innerText = "Palaces"
-    controlDiv.appendChild(dropdownButton);
+function createDropdown(wrapper, text) {
+    const div = document.createElement('div')
+    const button = document.createElement('button')
+    button.classList.add("btn")
+    button.classList.add("btn-light")
+    button.classList.add("mx-3")
+    button.classList.add("dropdown-toggle")
+    button.type = "button"
+    button.setAttribute("data-toggle", "dropdown")
+    button.setAttribute("aria-haspopup", "true")
+    button.setAttribute("aria-expanded", "false")
+    button.setAttribute("id", "dropdownMenu")
+    button.innerText = text
+    div.appendChild(button);
 
-    const menuContainer = document.createElement('div');
-    menuContainer.classList.add("dropdown-menu")
-    menuContainer.setAttribute("aria-labelledby", "dropdownMenu")
-    controlDiv.appendChild(menuContainer);
+    const container = document.createElement('div');
+    container.classList.add("dropdown-menu")
+    container.style['max-height'] = "200px"
+    container.style['max-width'] = "400px"
+    container.style['overflow-y'] = "auto"
+    container.setAttribute("aria-labelledby", "dropdownMenu")
+    div.appendChild(container);
+
+    wrapper.appendChild(div)
+    return container 
+
+}
+
+function CreateMenuControl(controlDiv, map) {
+    const container = document.createElement('div')
+    container.classList.add('dropdown')
+    container.classList.add('d-flex')
+    controlDiv.appendChild(container)
+
+    const palaceDrop = createDropdown(container, 'Palaces')
+    const pathDrop = createDropdown(container, 'Paths')
+    const markerDrop = createDropdown(container, 'Markers')
+
+    const markerSuccess = response => {
+        const ms = JSON.parse(response)
+        markerDrop.innerHTML = ""
+        ms.forEach((e, i) => {
+            let menuItem = document.createElement('button');
+            menuItem.innerText = e.title.trunc(30)
+            menuItem.classList.add("dropdown-item")
+            menuItem.setAttribute('type', 'button')
+            markerDrop.appendChild(menuItem);
+        })
+    }
+
+    const pathSuccess = response => {
+        const ms = JSON.parse(response)
+        pathDrop.innerHTML = ""
+        ms.forEach((e, i) => {
+            if (i == 0) {
+                ajax_load(`/ajax/${e.pk}/get_markers`, markerSuccess, errorDivId)
+            }
+            let menuItem = document.createElement('button');
+            menuItem.innerText = e.title.trunc(30)
+            menuItem.classList.add("dropdown-item")
+            menuItem.setAttribute('type', 'button')
+            pathDrop.appendChild(menuItem);
+            menuItem.addEventListener('click', () => {
+                ajax_load(`/ajax/${e.pk}/get_markers`, markerSuccess, errorDivId)
+            })
+        })
+    }
 
     const success = response => {
         const ms = JSON.parse(response)
-        ms.forEach(e => {
-            var menuItem = document.createElement('button');
-            menuItem.innerText = e.title
+        palaceDrop.innerHTML = ""
+        ms.forEach((e, i) => {
+            if (i == 0) {
+                ajax_load(`/ajax/${e.pk}/get_paths`, pathSuccess, errorDivId)
+            }
+            let menuItem = document.createElement('button');
+            menuItem.innerText = e.title.trunc(30)
             menuItem.classList.add("dropdown-item")
             menuItem.setAttribute('type', 'button')
-            menuContainer.appendChild(menuItem);
+            palaceDrop.appendChild(menuItem);
+            menuItem.addEventListener('click', () => {
+                ajax_load(`/ajax/${e.pk}/get_paths`, pathSuccess, errorDivId)
+            })
         })
     }
     const errorDivId = 'menu-modal-error'
@@ -473,3 +515,9 @@ $(function () {
     });
 
 });
+
+// utility
+String.prototype.trunc =
+    function (n) {
+        return this.substr(0, n - 1) + (this.length > n ? '...' : '');
+    };

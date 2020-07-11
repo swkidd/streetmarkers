@@ -18,5 +18,7 @@ urlpatterns = [
     path('map/', views.MapPageView.as_view(), name='map'),
     path('ajax/create_marker/', views.create_marker, name='create_marker'),
     path('ajax/load_markers/', views.load_markers, name='load_markers'),
-    path('ajax/get_palaces/', views.get_palaces, name='get_palaces')
+    path('ajax/get_palaces/', views.get_palaces, name='get_palaces'),
+    path('ajax/<int:pk>/get_paths/', views.get_paths, name='get_paths'),
+    path('ajax/<int:pk>/get_markers/', views.get_markers, name='get_markers')
 ]

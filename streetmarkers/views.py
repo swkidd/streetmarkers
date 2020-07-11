@@ -166,8 +166,47 @@ def get_palaces(request):
         palaces = Palace.objects.filter(createdBy=request.user) 
         palaces = [ {
             'title': m.title,
+            'pk': m.pk,
         } for m in palaces]
         response_data = json.dumps(palaces)
+        return HttpResponse(
+            json.dumps(response_data),
+            content_type="application/json"
+        )
+    else:
+        return HttpResponse(
+            json.dumps({"nothing to see": "this isn't happening"}),
+            content_Type="application/json"
+        )
+
+@login_required
+def get_paths(request, pk):
+    if request.method == 'GET':
+        palace = Palace.objects.get(createdBy=request.user, pk=pk)
+        paths = [ {
+            'title': m.title,
+            'pk': m.pk,
+        } for m in palace.path_set.all()]
+        response_data = json.dumps(paths)
+        return HttpResponse(
+            json.dumps(response_data),
+            content_type="application/json"
+        )
+    else:
+        return HttpResponse(
+            json.dumps({"nothing to see": "this isn't happening"}),
+            content_Type="application/json"
+        )
+
+@login_required
+def get_markers(request, pk):
+    if request.method == 'GET':
+        path = Path.objects.get(createdBy=request.user, pk=pk)
+        markers = [ {
+            'title': m.title,
+            'pk': m.pk,
+        } for m in path.basemarker_set.all()]
+        response_data = json.dumps(markers)
         return HttpResponse(
             json.dumps(response_data),
             content_type="application/json"
