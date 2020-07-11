@@ -204,6 +204,8 @@ def get_markers(request, pk):
         path = Path.objects.get(createdBy=request.user, pk=pk)
         markers = [ {
             'title': m.title,
+            'lat': m.lat,
+            'lng': m.lng,
             'pk': m.pk,
         } for m in path.basemarker_set.all()]
         response_data = json.dumps(markers)

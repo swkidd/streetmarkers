@@ -371,11 +371,18 @@ function CreateMenuControl(controlDiv, map) {
         const ms = JSON.parse(response)
         markerDrop.innerHTML = ""
         ms.forEach((e, i) => {
+            const pos = { lat: e.lat, lng: e.lng }
+            if (i == 0) {
+                map.setCenter(pos)
+            }
             let menuItem = document.createElement('button');
             menuItem.innerText = e.title.trunc(30)
             menuItem.classList.add("dropdown-item")
             menuItem.setAttribute('type', 'button')
             markerDrop.appendChild(menuItem);
+            menuItem.addEventListener('click', () => {
+                map.setCenter(pos)
+            })
         })
     }
 
