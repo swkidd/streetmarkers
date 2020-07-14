@@ -121,9 +121,49 @@ function initMap() {
     // add menu button to map view
     const addMenuDiv = document.createElement("div")
     addMenuDiv.style.margin = "10px"
+    addMenuDiv.classList.add('dropdown')
+    addMenuDiv.classList.add('d-flex')
     const menuObj = new CreateMenuControl(addMenuDiv, map)
     addMenuDiv.index = 1
-    map.controls[google.maps.ControlPosition.TOP_CENTER].push(addMenuDiv);
+
+    const width = window.innerWidth || document.documentElement.clientWidth ||
+        document.body.clientWidth;
+    const posRightTop = google.maps.ControlPosition.TOP_CENTER
+    const posLeftTop = google.maps.ControlPosition.LEFT_TOP
+    const menuPosChangeWidth = 730
+    let currentMenuPosition = width < menuPosChangeWidth ? posLeftTop : posRightTop
+    const menuWidth = 'w-50'
+    const menuHeight = 'h-25'
+    addMenuDiv.classList.add(width < menuPosChangeWidth ? 'flex-column' : 'flex-row', 'justify-content-around')
+    addMenuDiv.classList.add(width < menuPosChangeWidth ? menuHeight : menuWidth)
+    map.controls[currentMenuPosition].push(addMenuDiv);
+
+    const swapControls = (oldPos, newPos, element, map) => {
+        const index = map.controls[oldPos].indexOf(element)
+        if (index > -1) {
+            map.controls[oldPos].removeAt(index)
+            map.controls[newPos].push(addMenuDiv)
+        }
+    }
+
+    // change control position based on screen width
+    window.addEventListener('resize', () => {
+        const width = window.innerWidth || document.documentElement.clientWidth ||
+            document.body.clientWidth;
+        const currentMap = panorama.getVisible() ? panorama : map
+        console.log(currentMap === panorama)
+        if (width < menuPosChangeWidth && currentMenuPosition === posRightTop) {
+            swapControls(posRightTop, posLeftTop, addMenuDiv, currentMap)
+            currentMenuPosition = posLeftTop
+            addMenuDiv.classList.remove('flex-row', menuWidth)
+            addMenuDiv.classList.add('flex-column', menuHeight)
+        } else if (width >= menuPosChangeWidth && currentMenuPosition == posLeftTop) {
+            swapControls(posLeftTop, posRightTop, addMenuDiv, currentMap)
+            currentMenuPosition = posRightTop
+            addMenuDiv.classList.remove('flex-column', menuHeight)
+            addMenuDiv.classList.add('flex-row', menuWidth)
+        }
+    })
 
     // add create marker element to panorama view
     const addMarkerDiv = document.createElement("div")
@@ -132,7 +172,7 @@ function initMap() {
     addMarkerDiv.style.margin = "10px"
     const createMarkerObj = new CreateMarkerControl(addMarkerDiv, panorama)
     addMarkerDiv.index = 1
-    panorama.controls[google.maps.ControlPosition.RIGHT_TOP].push(addMarkerDiv);
+    panorama.controls[google.maps.ControlPosition.TOP_RIGHT].push(addMarkerDiv);
 
     // add refresh markers element to panorama view
     const refreshMarkersDiv = document.createElement("div")
@@ -159,7 +199,16 @@ function initMap() {
             $("#map").removeClass('big-map');
             $("#map").addClass('pip-map');
             changeMaps(markers, panorama)
+
+            // remove menu controls from map and add to pano
+            const index = map.controls[currentMenuPosition].indexOf(addMenuDiv)
+            if (index > -1) {
+                map.controls[currentMenuPosition].removeAt(index)
+                panorama.controls[currentMenuPosition].push(addMenuDiv)
+            }
+            
             panoLBControls.push(mapDiv)
+
             map.setOptions({
                 streetViewControl: false,
                 zoomControl: true,
@@ -194,11 +243,18 @@ function initMap() {
         $("#map").removeClass('pip-map');
         $("#map").addClass('big-map');
         changeMaps(markers, map)
+        
+        // remove menu controls from pano and add to map
+        let menuIndex = panorama.controls[currentMenuPosition].indexOf(addMenuDiv)
+        if (menuIndex > -1) {
+            panorama.controls[currentMenuPosition].removeAt(menuIndex)
+            map.controls[currentMenuPosition].push(addMenuDiv)
+        }
 
         // remove pip-map from pano controls and add it back to container
-        const index = panoLBControls.indexOf(mapDiv)
-        if (index > -1) {
-            const div = panoLBControls.removeAt(index)
+        const mapIndex = panoLBControls.indexOf(mapDiv)
+        if (mapIndex > -1) {
+            const div = panoLBControls.removeAt(mapIndex)
             mapContainerDiv.append(div)
         }
 
@@ -331,10 +387,8 @@ function CreateMarkerControl(controlDiv, map) {
 function createDropdown(wrapper, text) {
     const div = document.createElement('div')
     const button = document.createElement('button')
-    button.classList.add("btn")
-    button.classList.add("btn-light")
-    button.classList.add("mx-3")
-    button.classList.add("dropdown-toggle")
+    button.style['width'] = "100px"
+    button.classList.add("btn", "btn-light", "dropdown-toggle")
     button.type = "button"
     button.setAttribute("data-toggle", "dropdown")
     button.setAttribute("aria-haspopup", "true")
@@ -352,16 +406,11 @@ function createDropdown(wrapper, text) {
     div.appendChild(container);
 
     wrapper.appendChild(div)
-    return container 
+    return container
 
 }
 
-function CreateMenuControl(controlDiv, map) {
-    const container = document.createElement('div')
-    container.classList.add('dropdown')
-    container.classList.add('d-flex')
-    controlDiv.appendChild(container)
-
+function CreateMenuControl(container, map) {
     const palaceDrop = createDropdown(container, 'Palaces')
     const pathDrop = createDropdown(container, 'Paths')
     const markerDrop = createDropdown(container, 'Markers')
