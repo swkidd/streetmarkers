@@ -10,75 +10,82 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
-        .base-generic-body {
+        .base-generic-container {
+            position: relative;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            margin: 0;
         }
-        
+
         .base-generic-header {
             height: 50px;
         }
 
         .base-generic-footer {
-            flex: 0 0 50px;
-            margin-top: auto;
+            position: absolute;
+            bottom: 0;
+            height: 50px;
+            width: 100%;
+            margin-top: 10px;
+            padding: 0;
         }
     </style>
 
-    {% block style %}{% endblock %}
+    {% block style %}{% endblock style%}
 
 </head>
 
-<body class="base-generic-body">
-    <header class="base-generic-header">
-        <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
-            <div class="container">
-                <a class="navbar-brand" href="{% url 'streetmarkers:home' %}">MEMNUT</a>
-                <button class="navbar-toggler" type="button" data-toggle="collapse"
-                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
+<body>
+    <div class="base-generic-container">
+        <header class="base-generic-header">
+            <nav class="navbar navbar-expand-lg navbar-light bg-light fixed-top">
+                <div class="container">
+                    <a class="navbar-brand" href="{% url 'streetmarkers:home' %}">MEMNUT</a>
+                    <button class="navbar-toggler" type="button" data-toggle="collapse"
+                        data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav ml-auto">
-                        {% if user.is_authenticated %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'streetmarkers:user_palace' %}">Palaces</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'pegs:peg_detail' %}">Peg Systems</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'streetmarkers:map' %}">Map</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'logout' %}">Logout</a>
-                        </li>
-                        {% else %}
-                        <li class="nav-item">
-                            <a class="nav-link" href="{% url 'login' %}">Login</a>
-                        </li>
-                        {% endif %}
-                    </ul>
+                    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                        <ul class="navbar-nav ml-auto">
+                            {% if user.is_authenticated %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'streetmarkers:user_palace' %}">Palaces</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'pegs:peg_detail' %}">Peg Systems</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'streetmarkers:map' %}">Map</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'logout' %}">Logout</a>
+                            </li>
+                            {% else %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'login' %}">Login</a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </div>
                 </div>
+            </nav>
+        </header>
+
+        <footer class="base-generic-footer bg-light">
+            <div class="container">
+                <p class="text-center">MEMNUT MEMNUT MEMNUT</p>
             </div>
-        </nav>
-    </header>
-    
-    <div class="m-5">
-    {% block content %}{% endblock %}
-    </div>
-
-    <footer class="base-generic-footer py-3 bg-light">
-        <div class="container">
-            <p class="text-center">MEMNUT MEMNUT MEMNUT</p>
+        </footer>
+        <div class="m-5">
+            {% block content %}{% endblock content %}
         </div>
-    </footer>
 
-    {% block script %}{% endblock %}
 
+        {% block script %}{% endblock script %}
+    </div>
 </body>
 
 </html>
