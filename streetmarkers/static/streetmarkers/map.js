@@ -7,14 +7,14 @@ var panoDiv = document.getElementById("pano")
 var lat, lng;
 var pegMovingInSV = false
 
-const showMenu = () => {
-    // dont show the menu in panorama mode
-    document.querySelector("#menu-modal").style.display = "inline-block"
-}
+// const showMenu = () => {
+//     // dont show the menu in panorama mode
+//     document.querySelector("#menu-modal").style.display = "inline-block"
+// }
 
-const hideMenu = () => {
-    document.querySelector("#menu-modal").style.display = "none"
-}
+// const hideMenu = () => {
+//     document.querySelector("#menu-modal").style.display = "none"
+// }
 
 
 const showModal = () => {
@@ -185,7 +185,6 @@ function initMap() {
             })
             listeners = [clickListener, mouseOverListener, mouseOutListener]
             //make sure menu modal isn't open
-            hideMenu()
         }
     });
 
