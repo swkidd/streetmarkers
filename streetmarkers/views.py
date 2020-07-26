@@ -82,7 +82,6 @@ class MapPageView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         markerForm = BasicMarkerForm()
-        markerForm.fields['palace'].queryset = Palace.objects.filter(createdBy=self.request.user)
         context['basicMarkerForm'] = markerForm 
         context['markers'] = [ {
             'title': m.title,
@@ -162,8 +161,11 @@ def create_marker(request):
         infoText = request.POST.get('infoText')
         lat = request.POST.get('lat')
         lng = request.POST.get('lng')
-        palace = Palace.objects.get(pk=request.POST.get('palace'))
-        path = Path.objects.get(pk=request.POST.get('path'))
+        palace = Palace.objects.filter(
+            createdBy=request.user).get(pk=request.POST.get('palace'))
+        path = Path.objects.filter(
+            createdBy=request.user).get(pk=request.POST.get('path'))
+
         type = MarkerType.objects.get(typeName='basic')
         response_data = {}
 

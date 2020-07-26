@@ -347,8 +347,9 @@ $("#modal-form").on('submit', event => {
     event.preventDefault()
     const title = $('#id_title').val()
     const infoText = $('#id_infoText').val()
-    const palace = $('#id_palace').val()
-    const path = $('#id_path').val()
+    const palace = currentPalace.pk 
+    const path = currentPath.pk
+    console.log(palace,path)
     create_marker(title, infoText, palace, path)
 })
 
@@ -417,6 +418,8 @@ function createDropdown(wrapper, text) {
 
 }
 
+let currentPalace, currentPath, currentMarker
+
 function CreateMenuControl(container, map) {
     const palaceDrop = createDropdown(container, 'Palaces')
     const pathDrop = createDropdown(container, 'Paths')
@@ -427,7 +430,7 @@ function CreateMenuControl(container, map) {
         markerDrop.innerHTML = ""
         ms.forEach((e, i) => {
             const pos = { lat: e.lat, lng: e.lng }
-            if (i == 0) {
+            if (i == 0 && !panorama.getVisible()) {
                 map.setCenter(pos)
             }
             let menuItem = document.createElement('button');
@@ -436,7 +439,10 @@ function CreateMenuControl(container, map) {
             menuItem.setAttribute('type', 'button')
             markerDrop.appendChild(menuItem);
             menuItem.addEventListener('click', () => {
-                map.setCenter(pos)
+                currentMarker = e
+                if (!panorama.getVisible()) {
+                    map.setCenter(pos)
+                }
             })
         })
     }
@@ -454,6 +460,7 @@ function CreateMenuControl(container, map) {
             menuItem.setAttribute('type', 'button')
             pathDrop.appendChild(menuItem);
             menuItem.addEventListener('click', () => {
+                currentPath = e
                 ajax_load(`/ajax/${e.pk}/get_markers`, markerSuccess, errorDivId)
             })
         })
@@ -472,6 +479,7 @@ function CreateMenuControl(container, map) {
             menuItem.setAttribute('type', 'button')
             palaceDrop.appendChild(menuItem);
             menuItem.addEventListener('click', () => {
+                currentPalace = e
                 ajax_load(`/ajax/${e.pk}/get_paths`, pathSuccess, errorDivId)
             })
         })
