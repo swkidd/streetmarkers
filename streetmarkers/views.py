@@ -81,7 +81,9 @@ class MapPageView(LoginRequiredMixin, TemplateView):
     # use bootstrap forms to render conditional on a select tag
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['basicMarkerForm'] = BasicMarkerForm
+        markerForm = BasicMarkerForm()
+        markerForm.fields['palace'].queryset = Palace.objects.filter(createdBy=self.request.user)
+        context['basicMarkerForm'] = markerForm 
         context['markers'] = [ {
             'title': m.title,
             'palace': m.palace,
@@ -90,11 +92,69 @@ class MapPageView(LoginRequiredMixin, TemplateView):
             'lat': m.lat,
             'lng': m.lng,
             'infoText': markdown.markdown(m.infoText, safe_mode=True)
-        } for m in BasicMarker.objects.all()]
+        } for m in BasicMarker.objects.filter(createdBy=self.request.user).all()]
         context['palaces'] = Palace.objects.filter(createdBy=self.request.user)
         return context
 
+# create palace
+@login_required
+def create_palace(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        response_data = {}
 
+        palace = Palace(
+            createdBy=request.user, 
+            title=title, 
+        )
+        palace.save()
+
+        response_data['result'] = 'Create palace successful!'
+        response_data['palacepk'] = palace.pk
+        response_data['title'] = palace.title
+
+        return HttpResponse(
+            json.dumps(response_data),
+            content_type="application/json"
+        )
+    else:
+        return HttpResponse(
+            json.dumps({"nothing to see": "this isn't happening"}),
+            content_Type="application/json"
+        )
+
+# create path 
+@login_required
+def create_path(request):
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        palace = Palace.objects.get(pk=request.POST.get('palace'))
+        type = MarkerType.objects.get(typeName='basic')
+        response_data = {}
+
+        path = Path(
+            createdBy=request.user, 
+            title=title, 
+            palace=palace, 
+            type=type
+        )
+        palace.save()
+
+        response_data['result'] = 'Create palace successful!'
+        response_data['palacepk'] = path.pk
+        response_data['title'] = palace.title
+
+        return HttpResponse(
+            json.dumps(response_data),
+            content_type="application/json"
+        )
+    else:
+        return HttpResponse(
+            json.dumps({"nothing to see": "this isn't happening"}),
+            content_Type="application/json"
+        )
+
+#create marker
 @login_required
 def create_marker(request):
     if request.method == 'POST':
@@ -119,7 +179,7 @@ def create_marker(request):
         )
         marker.save()
 
-        response_data['result'] = 'Create post successful!'
+        response_data['result'] = 'Create marker successful!'
         response_data['markerpk'] = marker.pk
         response_data['title'] = marker.title
         response_data['infoText'] = marker.infoText

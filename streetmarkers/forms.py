@@ -7,6 +7,7 @@ class BasicMarkerForm(ModelForm):
         model = BasicMarker
         #type: 'basic'
         fields = ['title', 'infoText', 'path', 'palace']
+   
 
     ## only show paths that belong to the 'current' palace
     

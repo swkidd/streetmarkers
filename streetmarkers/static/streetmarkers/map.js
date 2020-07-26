@@ -386,6 +386,13 @@ function CreateMarkerControl(controlDiv, map) {
 
 function createDropdown(wrapper, text) {
     const div = document.createElement('div')
+    div.classList.add('btn-group')
+    const createButton = document.createElement('button')
+    createButton.classList.add("btn", "btn-dark")
+    createButton.style['width'] = "50px"
+    createButton.innerText = "+"
+    div.appendChild(createButton)
+
     const button = document.createElement('button')
     button.style['width'] = "100px"
     button.classList.add("btn", "btn-light", "dropdown-toggle")
