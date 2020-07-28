@@ -40,6 +40,20 @@ const clear_markers = () => {
     $('#marker-container').empty()
 }
 
+const reset_markers = ms => {
+    clear_markers()
+    ms.forEach(m => {
+        const mapMarker = document.createElement('map-marker')
+        mapMarker.setAttribute('hidden', true)
+        mapMarker.setAttribute('data-lat', m.lat)
+        mapMarker.setAttribute('data-lng', m.lng)
+        mapMarker.setAttribute('data-infoText', m.infoText)
+        mapMarker.innerText = m.title
+        $('#marker-container').append(mapMarker)
+    })
+    markers = create_markers('map-marker')
+}
+
 const changeMaps = (markers, map) => {
     markers.forEach(m => m.setMap(map))
 }
@@ -130,7 +144,7 @@ function initMap() {
         document.body.clientWidth;
     const posRightTop = google.maps.ControlPosition.TOP_CENTER
     const posLeftTop = google.maps.ControlPosition.LEFT_TOP
-    const menuPosChangeWidth = 730
+    const menuPosChangeWidth = 840
     let currentMenuPosition = width < menuPosChangeWidth ? posLeftTop : posRightTop
     const menuWidth = 'w-50'
     const menuHeight = 'h-25'
@@ -151,7 +165,6 @@ function initMap() {
         const width = window.innerWidth || document.documentElement.clientWidth ||
             document.body.clientWidth;
         const currentMap = panorama.getVisible() ? panorama : map
-        console.log(currentMap === panorama)
         if (width < menuPosChangeWidth && currentMenuPosition === posRightTop) {
             swapControls(posRightTop, posLeftTop, addMenuDiv, currentMap)
             currentMenuPosition = posLeftTop
@@ -206,7 +219,7 @@ function initMap() {
                 map.controls[currentMenuPosition].removeAt(index)
                 panorama.controls[currentMenuPosition].push(addMenuDiv)
             }
-            
+
             panoLBControls.push(mapDiv)
 
             map.setOptions({
@@ -243,7 +256,7 @@ function initMap() {
         $("#map").removeClass('pip-map');
         $("#map").addClass('big-map');
         changeMaps(markers, map)
-        
+
         // remove menu controls from pano and add to map
         let menuIndex = panorama.controls[currentMenuPosition].indexOf(addMenuDiv)
         if (menuIndex > -1) {
@@ -347,9 +360,9 @@ $("#modal-form").on('submit', event => {
     event.preventDefault()
     const title = $('#id_title').val()
     const infoText = $('#id_infoText').val()
-    const palace = currentPalace.pk 
+    const palace = currentPalace.pk
     const path = currentPath.pk
-    console.log(palace,path)
+    console.log(palace, path)
     create_marker(title, infoText, palace, path)
 })
 
@@ -428,11 +441,13 @@ function CreateMenuControl(container, map) {
     const markerSuccess = response => {
         const ms = JSON.parse(response)
         markerDrop.innerHTML = ""
+        let newMarkers = []
         ms.forEach((e, i) => {
             const pos = { lat: e.lat, lng: e.lng }
             if (i == 0 && !panorama.getVisible()) {
                 map.setCenter(pos)
             }
+            newMarkers.push(e)
             let menuItem = document.createElement('button');
             menuItem.innerText = e.title.trunc(30)
             menuItem.classList.add("dropdown-item")
@@ -445,6 +460,7 @@ function CreateMenuControl(container, map) {
                 }
             })
         })
+        reset_markers(newMarkers)
     }
 
     const pathSuccess = response => {
@@ -513,18 +529,7 @@ function RefreshMarkersControl(controlDiv, map) {
 
     const success = response => {
         const ms = JSON.parse(response)
-        console.log(ms)
-        clear_markers()
-        ms.forEach(m => {
-            const mapMarker = document.createElement('map-marker')
-            mapMarker.setAttribute('hidden', true)
-            mapMarker.setAttribute('data-lat', m.lat)
-            mapMarker.setAttribute('data-lng', m.lng)
-            mapMarker.setAttribute('data-infoText', m.infoText)
-            mapMarker.innerText = m.title
-            $('#marker-container').append(mapMarker)
-        })
-        markers = create_markers('map-marker')
+        reset_markers(ms)
     }
     const errorDivId = 'menu-modal-error'
     controlUI.addEventListener('click', function () {
