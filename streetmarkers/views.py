@@ -1,5 +1,6 @@
 import json
 from django.conf import settings
+from django.forms import modelform_factory
 from django.views.generic.base import TemplateView
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.shortcuts import render
@@ -11,7 +12,6 @@ from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 
 from .models import Palace, Path, BasicMarker, MarkerType
-from .forms import BasicMarkerForm
 
 ### logging ###
 import logging
@@ -81,8 +81,7 @@ class MapPageView(LoginRequiredMixin, TemplateView):
     # use bootstrap forms to render conditional on a select tag
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        markerForm = BasicMarkerForm()
-        context['basicMarkerForm'] = markerForm 
+        context['basicMarkerForm'] = modelform_factory(BasicMarker, fields=("title", "infoText")) 
         context['markers'] = [ {
             'title': m.title,
             'palace': m.palace,
@@ -204,7 +203,7 @@ def load_markers(request):
     if request.method == 'GET':
         basicMarkers = BasicMarker.objects.filter(createdBy=request.user) 
         markers = [ {
-            'infoText': m.infoText,
+            'infoText': markdown.markdown(m.infoText, safe_mode=True),
             'lat': m.basemarker_ptr.lat,
             'lng': m.basemarker_ptr.lng,
             'title': m.basemarker_ptr.title,
@@ -268,8 +267,11 @@ def get_markers(request, pk):
             'title': m.title,
             'lat': m.lat,
             'lng': m.lng,
+            'infoText': markdown.markdown(m.infoText, safe_mode=True),
             'pk': m.pk,
-        } for m in path.basemarker_set.all()]
+        } for m in [BasicMarker.objects.get(pk=bm.pk) 
+            for bm in path.basemarker_set.all() 
+            if BasicMarker.objects.filter(pk=bm.pk).exists()]]
         response_data = json.dumps(markers)
         return HttpResponse(
             json.dumps(response_data),

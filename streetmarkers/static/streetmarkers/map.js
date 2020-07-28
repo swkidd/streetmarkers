@@ -448,6 +448,7 @@ function CreateMenuControl(container, map) {
                 map.setCenter(pos)
             }
             newMarkers.push(e)
+            console.log(e)
             let menuItem = document.createElement('button');
             menuItem.innerText = e.title.trunc(30)
             menuItem.classList.add("dropdown-item")
@@ -461,6 +462,7 @@ function CreateMenuControl(container, map) {
             })
         })
         reset_markers(newMarkers)
+        console.log("new markers", markers)
     }
 
     const pathSuccess = response => {
