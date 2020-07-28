@@ -18,12 +18,12 @@ var pegMovingInSV = false
 
 
 const showModal = () => {
-    if (!panorama.getVisible()) return
+    //if (!panorama.getVisible()) return
     document.querySelector("#floating-modal").style.display = "inline-block"
 }
 
 const hideModal = () => {
-    if (!panorama.getVisible()) return
+    //if (!panorama.getVisible()) return
     document.querySelector("#floating-modal").style.display = "none"
     document.querySelector("#modal-form-results").innerHTML = ""
 }
@@ -342,6 +342,74 @@ function create_marker(title, infoText, palace, path) {
     });
 };
 
+$("#modal-marker-form").on('submit', event => {
+    event.preventDefault()
+    const title = $('#id_title').val()
+    const infoText = $('#id_infoText').val()
+    const palace = currentPalace.pk
+    const path = currentPath.pk
+    create_marker(title, infoText, palace, path)
+})
+
+// add path to database
+function create_path(title, palace) {
+    $.ajax({
+        url: "/ajax/create_path/", // the endpoint
+        type: "POST", // http method
+        data: { title, palace }, // data sent with the post request
+
+        // handle a successful response
+        success: function (json) {
+            // add path to map
+            document.querySelector("#floating-modal").style.display = "none"
+        },
+
+        // handle a non-successful response
+        error: function (xhr, errmsg, err) {
+            $('#modal-form-results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: " + errmsg +
+                " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+        }
+    });
+};
+
+$("#modal-path-form").on('submit', event => {
+    event.preventDefault()
+    const title = $('#id_title').val()
+    const palace = currentPalace.pk
+    create_path(title, infoText, palace, path)
+})
+
+// add palace to database
+function create_palace(title) {
+    $.ajax({
+        url: "/ajax/create_palace/", // the endpoint
+        type: "POST", // http method
+        data: { title }, // data sent with the post request
+
+        // handle a successful response
+        success: function (json) {
+            // add palace to map
+            document.querySelector("#floating-modal").style.display = "none"
+        },
+
+        // handle a non-successful response
+        error: function (xhr, errmsg, err) {
+            $('#modal-form-results').html("<div class='alert-box alert radius' data-alert>Oops! We have encountered an error: " + errmsg +
+                " <a href='#' class='close'>&times;</a></div>"); // add the error to the dom
+            console.log(xhr.status + ": " + xhr.responseText); // provide a bit more info about the error to the console
+        }
+    });
+};
+
+$("#modal-palace-form").on('submit', event => {
+    event.preventDefault()
+    const title = $('#id_title').val()
+    create_palace(title)
+})
+
+
+
 // load palace paths dynamically
 function ajax_load(url, success, errorDivId, method = "GET") {
     $.ajax({
@@ -355,16 +423,6 @@ function ajax_load(url, success, errorDivId, method = "GET") {
         }
     });
 };
-
-$("#modal-form").on('submit', event => {
-    event.preventDefault()
-    const title = $('#id_title').val()
-    const infoText = $('#id_infoText').val()
-    const palace = currentPalace.pk
-    const path = currentPath.pk
-    console.log(palace, path)
-    create_marker(title, infoText, palace, path)
-})
 
 function CreateMarkerControl(controlDiv, map) {
     var controlUI = document.createElement('div');
@@ -398,13 +456,14 @@ function CreateMarkerControl(controlDiv, map) {
     });
 }
 
-function createDropdown(wrapper, text) {
+function createDropdown(wrapper, text, onClick) {
     const div = document.createElement('div')
     div.classList.add('btn-group')
     const createButton = document.createElement('button')
     createButton.classList.add("btn", "btn-dark")
     createButton.style['width'] = "50px"
     createButton.innerText = "+"
+    div.addEventListener('click', onClick)
     div.appendChild(createButton)
 
     const button = document.createElement('button')
@@ -434,9 +493,22 @@ function createDropdown(wrapper, text) {
 let currentPalace, currentPath, currentMarker
 
 function CreateMenuControl(container, map) {
-    const palaceDrop = createDropdown(container, 'Palaces')
-    const pathDrop = createDropdown(container, 'Paths')
-    const markerDrop = createDropdown(container, 'Markers')
+    const onClick = id => () => {
+        const currentForm = document.getElementById(id)
+        if (!(currentForm.style.display === "none") && $("#floating-modal").is(":visible")) {
+            hideModal()
+        } else {
+            showModal()
+        }
+        
+        document.getElementById('basic-marker-form').style.display = "none"
+        document.getElementById('basic-path-form').style.display = "none"
+        document.getElementById('basic-palace-form').style.display = "none"
+        document.getElementById(id).style.display = "initial"
+    }
+    const palaceDrop = createDropdown(container, 'Palaces', onClick('basic-palace-form'))
+    const pathDrop = createDropdown(container, 'Paths', onClick('basic-path-form'))
+    const markerDrop = createDropdown(container, 'Markers', onClick('basic-marker-form'))
 
     const markerSuccess = response => {
         const ms = JSON.parse(response)

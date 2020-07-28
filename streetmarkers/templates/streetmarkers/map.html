@@ -74,13 +74,31 @@
 
 <body>
     <div id="floating-modal" style="display: none;">
-        <form action="/create_marker/" method="POST" id="modal-form">
-            {% csrf_token %}
-            {% bootstrap_form basicMarkerForm %}
-            <button type="submit">create</button>
-            <button type="button" onclick="hideModal();">cancel</button>
-            <div id="modal-form-results"></div>
-        </form>
+        <div id="basic-marker-form" style="display: none;">
+            <form id="modal-marker-form">
+                {% csrf_token %}
+                {% bootstrap_form basicMarkerForm %}
+                <button type="submit">create</button>
+                <button type="button" onclick="hideModal();">cancel</button>
+            </form>
+        </div>
+        <div id="basic-path-form" style="display: none;">
+            <form id="modal-path-form">
+                {% csrf_token %}
+                {% bootstrap_form basicPathForm %}
+                <button type="submit">create</button>
+                <button type="button" onclick="hideModal();">cancel</button>
+            </form>
+        </div>
+        <div id="basic-palace-form" style="display: none;">
+            <form id="modal-palace-form">
+                {% csrf_token %}
+                {% bootstrap_form basicPalaceForm %}
+                <button type="submit">create</button>
+                <button type="button" onclick="hideModal();">cancel</button>
+            </form>
+        </div>
+        <div id="modal-form-results"></div>
     </div>
     <div id="container">
         <div id="map" class="big-map"></div>

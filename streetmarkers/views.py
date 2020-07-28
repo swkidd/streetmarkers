@@ -1,6 +1,6 @@
 import json
 from django.conf import settings
-from django.forms import modelform_factory
+from django.forms import modelform_factory, ModelForm
 from django.views.generic.base import TemplateView
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 from django.shortcuts import render
@@ -73,6 +73,13 @@ class HomePageView(TemplateView):
         context = super().get_context_data(**kwargs)
         return context
 
+class PathForm(ModelForm):
+    class Meta:
+        model = Path
+        fields = ['title', 'palace']
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['palace'].queryset = Palace.objects.filter(createdBy=user)
 
 class MapPageView(LoginRequiredMixin, TemplateView):
     template_name = 'streetmarkers/map.html'
@@ -81,7 +88,9 @@ class MapPageView(LoginRequiredMixin, TemplateView):
     # use bootstrap forms to render conditional on a select tag
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['basicMarkerForm'] = modelform_factory(BasicMarker, fields=("title", "infoText")) 
+        context['basicMarkerForm'] = modelform_factory(BasicMarker, fields=("title", "infoText"))
+        context['basicPathForm'] =  PathForm(user=self.request.user) 
+        context['basicPalaceForm'] = modelform_factory(Palace, fields=("title",)) 
         context['markers'] = [ {
             'title': m.title,
             'palace': m.palace,
