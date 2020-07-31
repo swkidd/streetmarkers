@@ -63,16 +63,11 @@ const create_markers = query => [...document.querySelectorAll(query)].map(m => {
     const lat = parseFloat(m.getAttribute('data-lat'))
     const infoText = m.getAttribute('data-infoText')
     const title = m.innerText
-    const label = title.length < 2 ? {
-        text: title,
-        fontWeight: 'bold',
-        fontSize: '1.2em',
-    } : ''
     const marker = new google.maps.Marker({
         position: { lat, lng },
         map,
         title,
-        label,
+        icon: markerIcon,
     })
     const infoWindow = new google.maps.InfoWindow({
         content: `<p id="info-window">${infoText}</p>`,
@@ -305,12 +300,22 @@ function initMap() {
     })
 }
 
+const markerIcon = {
+    path: 'M 100, 100 m -75, 0 a 75,75 0 1,0 150,0 a 75,75 0 1,0 -150,0',
+    fillColor: 'blue',
+    fillOpacity: 1,
+    scale: 0.1,
+    strokeColor: 'blue',
+    strokeWeight: 5 
+}
+
 // add marker to map
 const addMarker = (title, infoText) => {
     const marker = new google.maps.Marker({
         position: { lat, lng },
         map: panorama,
         title,
+        icon: markerIcon,
     })
     const infoWindow = new google.maps.InfoWindow({
         content: `<p class="info-window">${infoText}</p>`
@@ -500,7 +505,7 @@ function CreateMenuControl(container, map) {
         } else {
             showModal()
         }
-        
+
         document.getElementById('basic-marker-form').style.display = "none"
         document.getElementById('basic-path-form').style.display = "none"
         document.getElementById('basic-palace-form').style.display = "none"
