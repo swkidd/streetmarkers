@@ -11,7 +11,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.decorators import login_required
 from django.urls import reverse_lazy
 
-from .models import Palace, Path, BasicMarker, MarkerType
+from .models import Palace, Path, BasicMarker, MarkerType, PathType
 
 ### logging ###
 import logging
@@ -117,7 +117,7 @@ def create_palace(request):
         palace.save()
 
         response_data['result'] = 'Create palace successful!'
-        response_data['palacepk'] = palace.pk
+        response_data['pk'] = palace.pk
         response_data['title'] = palace.title
 
         return HttpResponse(
@@ -136,7 +136,7 @@ def create_path(request):
     if request.method == 'POST':
         title = request.POST.get('title')
         palace = Palace.objects.get(pk=request.POST.get('palace'))
-        type = MarkerType.objects.get(typeName='basic')
+        type = PathType.objects.get(typeName='basic')
         response_data = {}
 
         path = Path(
@@ -145,11 +145,11 @@ def create_path(request):
             palace=palace, 
             type=type
         )
-        palace.save()
+        path.save()
 
-        response_data['result'] = 'Create palace successful!'
-        response_data['palacepk'] = path.pk
-        response_data['title'] = palace.title
+        response_data['result'] = 'Create path successful!'
+        response_data['pk'] = path.pk
+        response_data['title'] = path.title
 
         return HttpResponse(
             json.dumps(response_data),
@@ -190,7 +190,7 @@ def create_marker(request):
         marker.save()
 
         response_data['result'] = 'Create marker successful!'
-        response_data['markerpk'] = marker.pk
+        response_data['pk'] = marker.pk
         response_data['title'] = marker.title
         response_data['infoText'] = marker.infoText
         response_data['lng'] = marker.lng

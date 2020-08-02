@@ -67,7 +67,7 @@ const create_markers = query => [...document.querySelectorAll(query)].map(m => {
         position: { lat, lng },
         map,
         title,
-        icon: markerIcon,
+        //        icon: markerIcon,
     })
     const infoWindow = new google.maps.InfoWindow({
         content: `<p id="info-window">${infoText}</p>`,
@@ -306,7 +306,7 @@ const markerIcon = {
     fillOpacity: 1,
     scale: 0.1,
     strokeColor: 'blue',
-    strokeWeight: 5 
+    strokeWeight: 5
 }
 
 // add marker to map
@@ -315,7 +315,7 @@ const addMarker = (title, infoText) => {
         position: { lat, lng },
         map: panorama,
         title,
-        icon: markerIcon,
+        //        icon: markerIcon,
     })
     const infoWindow = new google.maps.InfoWindow({
         content: `<p class="info-window">${infoText}</p>`
@@ -335,6 +335,8 @@ function create_marker(title, infoText, palace, path) {
         // handle a successful response
         success: function (json) {
             addMarker(json.title, json.infoText)
+            const element = { title: json.title, pk: json.pk }
+            createMarkerMenuItem(element)
             document.querySelector("#floating-modal").style.display = "none"
         },
 
@@ -349,8 +351,8 @@ function create_marker(title, infoText, palace, path) {
 
 $("#modal-marker-form").on('submit', event => {
     event.preventDefault()
-    const title = $('#id_title').val()
-    const infoText = $('#id_infoText').val()
+    const title = $('#modal-marker-form #id_title').val()
+    const infoText = $('#modal-marker-form #id_infoText').val()
     const palace = currentPalace.pk
     const path = currentPath.pk
     create_marker(title, infoText, palace, path)
@@ -365,7 +367,8 @@ function create_path(title, palace) {
 
         // handle a successful response
         success: function (json) {
-            // add path to map
+            const element = { title: json.title, pk: json.pk }
+            createPathMenuItem(element)
             document.querySelector("#floating-modal").style.display = "none"
         },
 
@@ -380,9 +383,9 @@ function create_path(title, palace) {
 
 $("#modal-path-form").on('submit', event => {
     event.preventDefault()
-    const title = $('#id_title').val()
+    const title = $('#modal-path-form #id_title').val()
     const palace = currentPalace.pk
-    create_path(title, infoText, palace, path)
+    create_path(title, palace)
 })
 
 // add palace to database
@@ -394,7 +397,8 @@ function create_palace(title) {
 
         // handle a successful response
         success: function (json) {
-            // add palace to map
+            const element = { title: json.title, pk: json.pk }
+            createPalaceMenuItem(element)
             document.querySelector("#floating-modal").style.display = "none"
         },
 
@@ -409,7 +413,8 @@ function create_palace(title) {
 
 $("#modal-palace-form").on('submit', event => {
     event.preventDefault()
-    const title = $('#id_title').val()
+    const title = $('#modal-palace-form #id_title').val()
+    console.log(title)
     create_palace(title)
 })
 
@@ -468,7 +473,7 @@ function createDropdown(wrapper, text, onClick) {
     createButton.classList.add("btn", "btn-dark")
     createButton.style['width'] = "50px"
     createButton.innerText = "+"
-    div.addEventListener('click', onClick)
+    createButton.addEventListener('click', onClick)
     div.appendChild(createButton)
 
     const button = document.createElement('button')
@@ -495,7 +500,84 @@ function createDropdown(wrapper, text, onClick) {
 
 }
 
+/* palace, path, and marker ajax get */
+
 let currentPalace, currentPath, currentMarker
+let palaceDropdown, pathDropdown, markerDropdown
+
+const errorDivId = 'menu-modal-error'
+
+const createMenuItem = (element, dropdown, onClick) => {
+    let menuItem = document.createElement('button');
+    menuItem.innerText = element.title.trunc(30)
+    menuItem.classList.add("dropdown-item")
+    menuItem.setAttribute('type', 'button')
+    menuItem.addEventListener('click', onClick(element))
+    dropdown.appendChild(menuItem);
+}
+const createMarkerMenuItem = element => createMenuItem(element, markerDropdown, markerOnClick)
+const createPathMenuItem = element => createMenuItem(element, pathDropdown, pathOnClick)
+const createPalaceMenuItem = element => createMenuItem(element, palaceDropdown, palaceOnClick)
+
+const markerOnClick = element => () => {
+    currentMarker = element
+    const pos = { lat: element.lat, lng: element.lng }
+    if (!panorama.getVisible()) {
+        map.setCenter(pos)
+    }
+}
+
+const markerSuccess = response => {
+    const ms = JSON.parse(response)
+    markerDropdown.innerHTML = ""
+    let newMarkers = []
+    ms.forEach((e, i) => {
+        const pos = { lat: e.lat, lng: e.lng }
+        if (i == 0) {
+            currentMarker = e
+            if (!panorama.getVisible()) {
+                map.setCenter(pos)
+            }
+        }
+        newMarkers.push(e)
+        createMarkerMenuItem(e)
+    })
+    reset_markers(newMarkers)
+}
+
+const pathOnClick = element => () => {
+    currentPath = element
+    ajax_load(`/ajax/${element.pk}/get_markers`, markerSuccess, errorDivId)
+}
+
+const pathSuccess = response => {
+    const ms = JSON.parse(response)
+    pathDropdown.innerHTML = ""
+    ms.forEach((e, i) => {
+        if (i == 0) {
+            currentPath = e
+            ajax_load(`/ajax/${e.pk}/get_markers`, markerSuccess, errorDivId)
+        }
+        createPathMenuItem(e)
+    })
+}
+
+const palaceOnClick = element => () => {
+    currentPalace = element
+    ajax_load(`/ajax/${element.pk}/get_paths`, pathSuccess, errorDivId)
+}
+
+const palaceSuccess = response => {
+    const ms = JSON.parse(response)
+    palaceDropdown.innerHTML = ""
+    ms.forEach((e, i) => {
+        if (i == 0) {
+            currentPalace = e
+            ajax_load(`/ajax/${e.pk}/get_paths`, pathSuccess, errorDivId)
+        }
+        createPalaceMenuItem(e)
+    })
+}
 
 function CreateMenuControl(container, map) {
     const onClick = id => () => {
@@ -511,76 +593,11 @@ function CreateMenuControl(container, map) {
         document.getElementById('basic-palace-form').style.display = "none"
         document.getElementById(id).style.display = "initial"
     }
-    const palaceDrop = createDropdown(container, 'Palaces', onClick('basic-palace-form'))
-    const pathDrop = createDropdown(container, 'Paths', onClick('basic-path-form'))
-    const markerDrop = createDropdown(container, 'Markers', onClick('basic-marker-form'))
+    palaceDropdown = createDropdown(container, 'Palaces', onClick('basic-palace-form'))
+    pathDropdown = createDropdown(container, 'Paths', onClick('basic-path-form'))
+    markerDropdown = createDropdown(container, 'Markers', onClick('basic-marker-form'))
 
-    const markerSuccess = response => {
-        const ms = JSON.parse(response)
-        markerDrop.innerHTML = ""
-        let newMarkers = []
-        ms.forEach((e, i) => {
-            const pos = { lat: e.lat, lng: e.lng }
-            if (i == 0 && !panorama.getVisible()) {
-                map.setCenter(pos)
-            }
-            newMarkers.push(e)
-            console.log(e)
-            let menuItem = document.createElement('button');
-            menuItem.innerText = e.title.trunc(30)
-            menuItem.classList.add("dropdown-item")
-            menuItem.setAttribute('type', 'button')
-            markerDrop.appendChild(menuItem);
-            menuItem.addEventListener('click', () => {
-                currentMarker = e
-                if (!panorama.getVisible()) {
-                    map.setCenter(pos)
-                }
-            })
-        })
-        reset_markers(newMarkers)
-        console.log("new markers", markers)
-    }
-
-    const pathSuccess = response => {
-        const ms = JSON.parse(response)
-        pathDrop.innerHTML = ""
-        ms.forEach((e, i) => {
-            if (i == 0) {
-                ajax_load(`/ajax/${e.pk}/get_markers`, markerSuccess, errorDivId)
-            }
-            let menuItem = document.createElement('button');
-            menuItem.innerText = e.title.trunc(30)
-            menuItem.classList.add("dropdown-item")
-            menuItem.setAttribute('type', 'button')
-            pathDrop.appendChild(menuItem);
-            menuItem.addEventListener('click', () => {
-                currentPath = e
-                ajax_load(`/ajax/${e.pk}/get_markers`, markerSuccess, errorDivId)
-            })
-        })
-    }
-
-    const success = response => {
-        const ms = JSON.parse(response)
-        palaceDrop.innerHTML = ""
-        ms.forEach((e, i) => {
-            if (i == 0) {
-                ajax_load(`/ajax/${e.pk}/get_paths`, pathSuccess, errorDivId)
-            }
-            let menuItem = document.createElement('button');
-            menuItem.innerText = e.title.trunc(30)
-            menuItem.classList.add("dropdown-item")
-            menuItem.setAttribute('type', 'button')
-            palaceDrop.appendChild(menuItem);
-            menuItem.addEventListener('click', () => {
-                currentPalace = e
-                ajax_load(`/ajax/${e.pk}/get_paths`, pathSuccess, errorDivId)
-            })
-        })
-    }
-    const errorDivId = 'menu-modal-error'
-    ajax_load('/ajax/get_palaces', success, errorDivId)
+    ajax_load('/ajax/get_palaces', palaceSuccess, errorDivId)
 }
 
 function RefreshMarkersControl(controlDiv, map) {
