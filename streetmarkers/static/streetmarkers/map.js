@@ -16,7 +16,6 @@ var pegMovingInSV = false
 //     document.querySelector("#menu-modal").style.display = "none"
 // }
 
-
 const showModal = () => {
     //if (!panorama.getVisible()) return
     document.querySelector("#floating-modal").style.display = "inline-block"
@@ -78,7 +77,6 @@ const create_markers = query => [...document.querySelectorAll(query)].map(m => {
     markerInfoClick(marker, infoWindow)
     return marker
 })
-
 
 function initMap() {
     var tokyo = { lat: 35.689722, lng: 139.692222 };
@@ -512,14 +510,19 @@ const createMenuItem = (element, dropdown, onClick) => {
     menuItem.innerText = element.title.trunc(30)
     menuItem.classList.add("dropdown-item")
     menuItem.setAttribute('type', 'button')
-    menuItem.addEventListener('click', onClick(element))
+    menuItem.addEventListener('click', () => {
+        onClick(element)
+        dropdown.querySelectorAll(".dropdown-item").forEach(e => e.classList.remove("active"))
+        menuItem.classList.add("active")
+    })
     dropdown.appendChild(menuItem);
 }
 const createMarkerMenuItem = element => createMenuItem(element, markerDropdown, markerOnClick)
 const createPathMenuItem = element => createMenuItem(element, pathDropdown, pathOnClick)
 const createPalaceMenuItem = element => createMenuItem(element, palaceDropdown, palaceOnClick)
 
-const markerOnClick = element => () => {
+const markerOnClick = element => {
+    console.log(element)
     currentMarker = element
     const pos = { lat: element.lat, lng: element.lng }
     if (!panorama.getVisible()) {
@@ -545,7 +548,7 @@ const markerSuccess = response => {
     reset_markers(newMarkers)
 }
 
-const pathOnClick = element => () => {
+const pathOnClick = element => {
     currentPath = element
     ajax_load(`/ajax/${element.pk}/get_markers`, markerSuccess, errorDivId)
 }
@@ -562,7 +565,7 @@ const pathSuccess = response => {
     })
 }
 
-const palaceOnClick = element => () => {
+const palaceOnClick = element => { 
     currentPalace = element
     ajax_load(`/ajax/${element.pk}/get_paths`, pathSuccess, errorDivId)
 }
@@ -596,7 +599,7 @@ function CreateMenuControl(container, map) {
     palaceDropdown = createDropdown(container, 'Palaces', onClick('basic-palace-form'))
     pathDropdown = createDropdown(container, 'Paths', onClick('basic-path-form'))
     markerDropdown = createDropdown(container, 'Markers', onClick('basic-marker-form'))
-
+    console.log(palaceDropdown)
     ajax_load('/ajax/get_palaces', palaceSuccess, errorDivId)
 }
 

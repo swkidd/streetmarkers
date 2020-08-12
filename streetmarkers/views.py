@@ -73,13 +73,13 @@ class HomePageView(TemplateView):
         context = super().get_context_data(**kwargs)
         return context
 
-class PathForm(ModelForm):
-    class Meta:
-        model = Path
-        fields = ['title', 'palace']
-    def __init__(self, user, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['palace'].queryset = Palace.objects.filter(createdBy=user)
+# class PathForm(ModelForm):
+#     class Meta:
+#         model = Path
+#         fields = ['title', 'palace']
+#     def __init__(self, user, *args, **kwargs):
+#         super().__init__(*args, **kwargs)
+#         self.fields['palace'].queryset = Palace.objects.filter(createdBy=user)
 
 class MapPageView(LoginRequiredMixin, TemplateView):
     template_name = 'streetmarkers/map.html'
@@ -89,7 +89,8 @@ class MapPageView(LoginRequiredMixin, TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['basicMarkerForm'] = modelform_factory(BasicMarker, fields=("title", "infoText"))
-        context['basicPathForm'] =  PathForm(user=self.request.user) 
+        #context['basicPathForm'] =  PathForm(user=self.request.user) 
+        context['basicPathForm'] =  modelform_factory(Path, fields=("title",)) 
         context['basicPalaceForm'] = modelform_factory(Palace, fields=("title",)) 
         context['markers'] = [ {
             'title': m.title,
